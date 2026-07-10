@@ -1,1 +1,19 @@
+Version: ‘3.8’
+
+Services:
+  Postgres:
+    Image: postgres:15-alpine
+    Environment:
+      POSTGRES_USER: assetflow
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: assetflow
+    Ports:
+-	“5432:5432”
+    Volumes:
+-	Postgres_data:/var/lib/postgresql/data
+    Healthcheck:
+      Test: [“CMD-SHELL”, “pg_isready -U assetflow”]
+      Interval: 10s
+      Timeout: 5s
+      Retries: 5
 
