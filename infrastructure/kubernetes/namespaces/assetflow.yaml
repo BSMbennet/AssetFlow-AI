@@ -1,0 +1,36 @@
+# ============================================
+# ASSETFLOW AI - Namespace
+# ============================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: assetflow
+  labels:
+    name: assetflow
+    environment: production
+    team: platform
+    app: assetflow
+  annotations:
+    "nvidia.com/gpu": "false"
+    "configmanagement.gke.io/managed-by": "terraform"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: assetflow-dev
+  labels:
+    name: assetflow-dev
+    environment: development
+    team: platform
+    app: assetflow
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: assetflow-staging
+  labels:
+    name: assetflow-staging
+    environment: staging
+    team: platform
+    app: assetflow
