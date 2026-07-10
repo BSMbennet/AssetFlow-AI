@@ -2,7 +2,7 @@
 # ASSETFLOW AI - Admin Dashboard
 # ============================================
 
-FROM node:18-alpine AS builder
+FROM node:26-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -33,7 +33,7 @@ RUN npm run build --workspace=@assetflow/admin
 # Production Image
 # ============================================
 
-FROM node:18-alpine AS runner
+FROM node:26-alpine AS runner
 
 WORKDIR /app
 
