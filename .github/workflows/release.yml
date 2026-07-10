@@ -101,7 +101,7 @@ jobs:
     
     steps:
     - name: Send notification to Slack
-      uses: slackapi/slack-github-action@v1.24.0
+      uses: slackapi/slack-github-action@v3.0.3
       with:
         channel-id: 'C04TZSLP1J6'
         slack-message: |
