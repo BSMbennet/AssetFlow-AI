@@ -17,3 +17,72 @@ Services:
       Timeout: 5s
       Retries: 5
 
+  Redis:
+    Image: redis:7-alpine
+    Ports:
+-	“6379:6379”
+    Volumes:
+-	Redis_data:/data
+    Healthcheck:
+      Test: [“CMD”, “redis-cli”, “ping”]
+      Interval: 10s
+      Timeout: 5s
+      Retries: 5
+
+  Api:
+    Build:
+      Context: ..
+      Dockerfile: docker/Dockerfile.api
+    Environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://assetflow:${DB_PASSWORD}@postgres:5432/assetflow
+      REDIS_URL: redis://redis:6379
+    Ports:
+-	“3001:3001”
+    Depends_on:
+      Postgres:
+        Condition: service_healthy
+      Redis:
+        Condition: service_healthy
+    Volumes:
+      - ../apps/api:/app
+      - /app/node_modules
+
+  Blockchain:
+    Build:
+      Context: ..
+      Dockerfile: docker/Dockerfile.blockchain
+    Environment:
+      DATABASE_URL: postgresql://assetflow:${DB_PASSWORD}@postgres:5432/assetflow
+      REDIS_URL: redis://redis:6379
+      WEB3_PROVIDER: ${WEB3_PROVIDER}
+    Ports:
+-	“8000:8000”
+    Depends_on:
+      Postgres:
+        Condition: service_healthy
+      Redis:
+        Condition: service_healthy
+    Volumes:
+-	../apps/blockchain:/app
+
+  Web:
+    Build:
+      Context: ..
+      Dockerfile: docker/Dockerfile.web
+    Environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_BLOCKCHAIN_URL: http://localhost:8000
+    Ports:
+-	“3000:3000”
+    Depends_on:
+      - api
+      - blockchain
+    Volumes:
+      - ../apps/web:/app
+      - /app/node_modules
+      - /app/.next
+
+Volumes:
+  Postgres_data:
+  Redis_data:
