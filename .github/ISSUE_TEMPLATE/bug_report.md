@@ -37,3 +37,15 @@ assignees: ''
 
 ## Logs
 <!-- If applicable, add logs or error messages -->
+
+
+
+## Impact
+<!-- Please select the impact level -->
+- [ ] Critical (System down, data loss)
+- [ ] High (Major feature broken)
+- [ ] Medium (Feature partially broken)
+- [ ] Low (Minor issue, cosmetic)
+
+## Workaround
+<!-- Is there a workaround for this issue? -->
