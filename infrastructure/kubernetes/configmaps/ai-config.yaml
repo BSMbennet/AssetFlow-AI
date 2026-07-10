@@ -1,0 +1,27 @@
+# ============================================
+# ASSETFLOW AI - AI Service ConfigMap
+# ============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-config
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: ai
+data:
+  log_level: "info"
+  debug: "false"
+  cors_origins: "https://assetflow.ai,https://www.assetflow.ai"
+  openai_model: "gpt-4-turbo-preview"
+  max_tokens: "4096"
+  temperature: "0.7"
+  redis_ttl: "3600"
+  cache_ttl: "3600"
+  rate_limit_enabled: "true"
+  rate_limit_requests: "100"
+  rate_limit_period: "60"
+  enable_ocr: "true"
+  enable_embedding: "true"
+  enable_agent_workflows: "true"
