@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentation
+    url: https://docs.assetflow.ai
+    about: Check the documentation for common questions
+  - name: 📧 Email Support
+    url: mailto:support@assetflow.ai
+    about: Contact support for enterprise customers
+  - name: 💬 Discord Community
+    url: https://discord.gg/assetflow
+    about: Join our community for discussions and support
