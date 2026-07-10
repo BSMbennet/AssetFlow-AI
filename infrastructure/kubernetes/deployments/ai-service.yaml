@@ -1,0 +1,20 @@
+# ============================================
+# ASSETFLOW AI - AI Service
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetflow-ai
+  namespace: assetflow
+  labels:
+    app: assetflow-ai
+spec:
+  selector:
+    app: assetflow-ai
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+    protocol: TCP
+  type: ClusterIP
