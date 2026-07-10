@@ -1,0 +1,136 @@
+# ============================================
+# ASSETFLOW AI - Prometheus Configuration
+# ============================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+  # Alert manager configuration
+  alerting:
+    alertmanagers:
+      - static_configs:
+          - targets:
+            - alertmanager:9093
+
+# Rule files
+rule_files:
+  - /etc/prometheus/alert.rules.yml
+
+# Scrape configurations
+scrape_configs:
+  # Scrape prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape API metrics
+  - job_name: 'assetflow-api'
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+        - 'api:3001'
+        - 'api-prod:3001'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)'
+        replacement: '${1}'
+
+  # Scrape AI service metrics
+  - job_name: 'assetflow-ai'
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+        - 'ai-service:8000'
+        - 'ai-service-prod:8000'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)'
+        replacement: '${1}'
+
+  # Scrape Node.js metrics
+  - job_name: 'nodejs'
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+        - 'api:3001'
+        - 'web:3000'
+
+  # Scrape Redis metrics
+  - job_name: 'redis'
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+        - 'redis:6379'
+        - 'redis-prod:6379'
+
+  # Scrape PostgreSQL metrics
+  - job_name: 'postgresql'
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+        - 'postgres:5432'
+        - 'postgres-prod:5432'
+
+  # Scrape Nginx metrics
+  - job_name: 'nginx'
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+        - 'nginx:80/nginx_status'
+        - 'nginx-prod:80/nginx_status'
+
+# Alert rules
+groups:
+  - name: assetflow_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.instance }}"
+          description: "Error rate is {{ $value }}%"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time on {{ $labels.instance }}"
+          description: "95th percentile response time is {{ $value }}s"
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: "Service has been down for more than 1 minute"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
