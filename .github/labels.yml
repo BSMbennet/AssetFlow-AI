@@ -1,0 +1,115 @@
+# ============================================
+# GITHUB LABELS
+# ============================================
+
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+  
+- name: "enhancement"
+  color: "a2eeef"
+  description: "New feature or request"
+  
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+  
+- name: "dependencies"
+  color: "0366d6"
+  description: "Pull requests that update a dependency file"
+  
+- name: "security"
+  color: "b60205"
+  description: "Security related issues and PRs"
+  
+- name: "critical"
+  color: "b60205"
+  description: "Critical issues that need immediate attention"
+  
+- name: "high-priority"
+  color: "d93f0b"
+  description: "High priority issues"
+  
+- name: "medium-priority"
+  color: "fbca04"
+  description: "Medium priority issues"
+  
+- name: "low-priority"
+  color: "0e8a16"
+  description: "Low priority issues"
+  
+- name: "wontfix"
+  color: "ffffff"
+  description: "This will not be worked on"
+  
+- name: "duplicate"
+  color: "cfd3d7"
+  description: "This issue or pull request already exists"
+  
+- name: "invalid"
+  color: "e4e669"
+  description: "This doesn't seem right"
+  
+- name: "question"
+  color: "d876e3"
+  description: "Further information is requested"
+  
+- name: "good-first-issue"
+  color: "7057ff"
+  description: "Good for newcomers"
+  
+- name: "help-wanted"
+  color: "008672"
+  description: "Extra attention is needed"
+  
+- name: "blocked"
+  color: "e11d21"
+  description: "Blocked by another issue"
+  
+- name: "backend"
+  color: "0075ca"
+  description: "Backend related"
+  
+- name: "frontend"
+  color: "f9d71c"
+  description: "Frontend related"
+  
+- name: "blockchain"
+  color: "5319e7"
+  description: "Blockchain related"
+  
+- name: "ai"
+  color: "00c3ff"
+  description: "AI related"
+  
+- name: "infrastructure"
+  color: "0e8a16"
+  description: "Infrastructure related"
+  
+- name: "performance"
+  color: "d4c5f9"
+  description: "Performance related"
+  
+- name: "testing"
+  color: "fef2c0"
+  description: "Testing related"
+  
+- name: "breaking-change"
+  color: "b60205"
+  description: "Breaking change"
+  
+- name: "deployment"
+  color: "0e8a16"
+  description: "Deployment related"
+  
+- name: "monitoring"
+  color: "0052cc"
+  description: "Monitoring related"
+  
+- name: "refactor"
+  color: "1d76db"
+  description: "Code refactoring"
+  
+- name: "design"
+  color: "cc317c"
+  description: "Design related"
