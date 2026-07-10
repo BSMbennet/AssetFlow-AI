@@ -1,0 +1,30 @@
+# ============================================
+# ASSETFLOW AI - Service Accounts
+# ============================================
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: assetflow-api-sa
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: api
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: assetflow-ai-sa
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: ai
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: assetflow-web-sa
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: web
