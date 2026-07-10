@@ -1,0 +1,63 @@
+# ============================================
+# ASSETFLOW AI - Admin Dashboard
+# ============================================
+
+FROM node:18-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY turbo.json ./
+COPY apps/admin/package*.json ./apps/admin/
+COPY packages/shared-types/package*.json ./packages/shared-types/
+COPY packages/ui/package*.json ./packages/ui/
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# Copy source code
+COPY apps/admin ./apps/admin
+COPY packages/shared-types ./packages/shared-types
+COPY packages/ui ./packages/ui
+
+# Build shared packages
+RUN npm run build --workspace=@assetflow/shared-types
+RUN npm run build --workspace=@assetflow/ui
+
+# Build admin application
+RUN npm run build --workspace=@assetflow/admin
+
+# ============================================
+# Production Image
+# ============================================
+
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Copy built application
+COPY --from=builder /app/apps/admin/dist ./apps/admin/dist
+COPY --from=builder /app/apps/admin/package.json ./apps/admin/package.json
+COPY --from=builder /app/apps/admin/node_modules ./apps/admin/node_modules
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy shared packages
+COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=builder /app/packages/shared-types/package.json ./packages/shared-types/package.json
+COPY --from=builder /app/packages/ui/dist ./packages/ui/dist
+COPY --from=builder /app/packages/ui/package.json ./packages/ui/package.json
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
+USER nodejs
+
+EXPOSE 3002
+
+# Start the application
+CMD ["node", "apps/admin/dist/main.js"]
