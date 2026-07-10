@@ -1,1 +1,30 @@
 
+{
+  “name”: “assetflow-ai”,
+  “version”: “1.0.0”,
+  “private”: true,
+  “workspaces”: [
+    “apps/*”,
+    “packages/*”
+  ],
+  “scripts”: {
+    “dev”: “turbo run dev”,
+    “build”: “turbo run build”,
+    “test”: “turbo run test”,
+    “lint”: “turbo run lint”,
+    “deploy”: “./scripts/deploy.sh”,
+    “docker:up”: “docker-compose -f docker/docker-compose.yml up”,
+    “docker:down”: “docker-compose -f docker/docker-compose.yml down”,
+    “infra:plan”: “cd infrastructure/terraform && terraform plan”,
+    “infra:apply”: “cd infrastructure/terraform && terraform apply”
+  },
+  “devDependencies”: {
+    “turbo”: “^1.10.0”,
+    “prettier”: “^3.0.0”,
+    “eslint”: “^8.0.0”,
+    “typescript”: “^5.0.0”
+  },
+  “engines”: {
+    “node”: “>=18.0.0”
+  }
+}
