@@ -1,0 +1,37 @@
+{
+  "name": "@assetflow/blockchain-utils",
+  "version": "1.0.0",
+  "description": "Blockchain utilities for AssetFlow AI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "web3": "^4.3.0",
+    "ethers": "^6.9.2",
+    "@openzeppelin/contracts": "^5.0.0",
+    "@openzeppelin/contracts-upgradeable": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  },
+  "peerDependencies": {
+    "web3": "^4.0.0",
+    "ethers": "^6.0.0"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "web3",
+    "assetflow"
+  ],
+  "author": "AssetFlow AI",
+  "license": "MIT"
+}
