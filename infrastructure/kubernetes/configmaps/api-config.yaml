@@ -1,0 +1,28 @@
+# ============================================
+# ASSETFLOW AI - API ConfigMap
+# ============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: api
+data:
+  node_env: "production"
+  port: "3001"
+  log_level: "info"
+  cors_origin: "https://assetflow.ai,https://www.assetflow.ai"
+  s3_bucket: "assetflow-prod-uploads"
+  enable_metrics: "true"
+  enable_tracing: "true"
+  rate_limit_enabled: "true"
+  rate_limit_requests: "100"
+  rate_limit_period: "60"
+  session_timeout: "3600"
+  max_upload_size: "52428800"
+  allowed_origins: "https://assetflow.ai,https://www.assetflow.ai"
+  api_version: "v1"
+  enable_docs: "false"
