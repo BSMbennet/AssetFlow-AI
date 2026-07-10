@@ -1,0 +1,20 @@
+# ============================================
+# ASSETFLOW AI - Web ConfigMap
+# ============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-config
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: web
+data:
+  node_env: "production"
+  api_url: "https://api.assetflow.ai"
+  ai_url: "https://ai.assetflow.ai"
+  ws_url: "wss://api.assetflow.ai"
+  environment: "production"
+  analytics_id: "UA-XXXXXXXXX-X"
+  enable_debug: "false"
