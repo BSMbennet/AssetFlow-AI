@@ -1,0 +1,40 @@
+# ============================================
+# ASSETFLOW AI - API Service
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetflow-api
+  namespace: assetflow
+  labels:
+    app: assetflow-api
+spec:
+  selector:
+    app: assetflow-api
+  ports:
+  - port: 3001
+    targetPort: 3001
+    name: http
+    protocol: TCP
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetflow-api-headless
+  namespace: assetflow
+  labels:
+    app: assetflow-api
+spec:
+  selector:
+    app: assetflow-api
+  ports:
+  - port: 3001
+    targetPort: 3001
+    name: http
+  clusterIP: None
