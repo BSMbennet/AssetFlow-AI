@@ -1,1 +1,426 @@
+# ============================================
+# ASSETFLOW AI - CI/CD Pipeline
+# ============================================
 
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, release/*]
+  pull_request:
+    branches: [main, develop]
+  release:
+    types: [published]
+  schedule:
+    - cron: '0 2 * * *'  # Daily security scan at 2 AM
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  AWS_REGION: us-east-1
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ github.sha }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================
+  # LINTING & CODE QUALITY
+  # ============================================
+  
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        pip install -r apps/ai-service/requirements.txt
+        pip install black flake8 mypy
+    
+    - name: Lint TypeScript
+      run: npm run lint
+    
+    - name: Lint Python
+      run: |
+        cd apps/ai-service
+        black . --check --diff
+        flake8 . --max-line-length=120 --extend-ignore=E203,W503
+        mypy . --ignore-missing-imports
+    
+    - name: Lint Markdown
+      run: npx markdownlint-cli "**/*.md" --ignore node_modules
+    
+    - name: Check formatting
+      run: npx prettier --check "**/*.{js,ts,tsx,json,md}" --ignore-path .gitignore
+    
+    - name: Check TypeScript types
+      run: npm run type-check
+
+  # ============================================
+  # SECURITY SCANNING
+  # ============================================
+  
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run npm audit
+      run: npm audit --audit-level=moderate
+    
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high --all-projects
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
+        limit-severities-for-sarif: true
+    
+    - name: Upload Trivy results to GitHub
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Run CodeQL analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: '/language:javascript'
+    
+    - name: Check for secrets
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Check dependencies for vulnerabilities
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'AssetFlow AI'
+        path: '.'
+        format: 'HTML'
+        out: 'reports'
+        args: >
+          --failOnCVSS 7
+          --enableRetired
+          --suppression ./dependency-check-suppression.xml
+
+  # ============================================
+  # TESTING
+  # ============================================
+  
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        pip install -r apps/ai-service/requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Run TypeScript tests
+      run: npm run test -- --coverage
+    
+    - name: Run Python tests
+      run: |
+        cd apps/ai-service
+        pytest --cov=src --cov-report=xml
+    
+    - name: Run contract tests
+      run: |
+        cd contracts
+        npm test -- --coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage/lcov.info,./apps/ai-service/coverage.xml,./contracts/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        verbose: true
+
+  # ============================================
+  # BUILD & PUSH
+  # ============================================
+  
+  build:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) ||
+      github.event_name == 'release'
+    
+    strategy:
+      matrix:
+        service: [web, api, ai, admin]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Login to AWS ECR
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+    
+    - name: Build and push ${{ matrix.service }}
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.${{ matrix.service }}
+        push: true
+        tags: |
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:latest
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ github.ref_name }}
+          ${{ secrets.DOCKER_USERNAME }}/assetflow-${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          ${{ secrets.DOCKER_USERNAME }}/assetflow-${{ matrix.service }}:${{ github.ref_name }}
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/assetflow/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+        cache-from: type=gha,scope=${{ matrix.service }}
+        cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+        build-args: |
+          NODE_ENV=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    
+    - name: Scan image for vulnerabilities
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+        format: 'sarif'
+        output: 'trivy-image-results.sarif'
+        severity: 'CRITICAL,HIGH'
+    
+    - name: Upload Trivy image scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-image-results.sarif'
+
+  # ============================================
+  # DEPLOY TO KUBERNETES
+  # ============================================
+  
+  deploy:
+    name: Deploy to ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        environment: [staging, production]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name assetflow-${{ matrix.environment }} --region ${{ env.AWS_REGION }}
+    
+    - name: Apply Kubernetes manifests
+      run: |
+        kubectl apply -f infrastructure/kubernetes/namespaces/assetflow-${{ matrix.environment }}.yaml
+        
+        # Apply configmaps
+        kubectl apply -f infrastructure/kubernetes/configmaps/ -n assetflow-${{ matrix.environment }}
+        
+        # Apply secrets with environment variables
+        envsubst < infrastructure/kubernetes/secrets/secrets-${{ matrix.environment }}.yaml | kubectl apply -f -
+        
+        # Apply deployments
+        kubectl set image deployment/assetflow-api api=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/api:${{ env.IMAGE_TAG }} -n assetflow-${{ matrix.environment }}
+        kubectl set image deployment/assetflow-ai ai=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/ai:${{ env.IMAGE_TAG }} -n assetflow-${{ matrix.environment }}
+        kubectl set image deployment/assetflow-web web=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/web:${{ env.IMAGE_TAG }} -n assetflow-${{ matrix.environment }}
+        
+        # Apply services and ingress
+        kubectl apply -f infrastructure/kubernetes/services/ -n assetflow-${{ matrix.environment }}
+        kubectl apply -f infrastructure/kubernetes/ingress/ -n assetflow-${{ matrix.environment }}
+    
+    - name: Wait for rollout
+      run: |
+        kubectl rollout status deployment/assetflow-api -n assetflow-${{ matrix.environment }} --timeout=5m
+        kubectl rollout status deployment/assetflow-ai -n assetflow-${{ matrix.environment }} --timeout=5m
+        kubectl rollout status deployment/assetflow-web -n assetflow-${{ matrix.environment }} --timeout=5m
+    
+    - name: Run smoke tests
+      run: |
+        ./scripts/smoke-tests.sh ${{ matrix.environment }}
+    
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n assetflow-${{ matrix.environment }}
+        kubectl get services -n assetflow-${{ matrix.environment }}
+        kubectl get ingress -n assetflow-${{ matrix.environment }}
+    
+    - name: Notify deployment status
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const status = '${{ job.status }}'
+          const environment = '${{ matrix.environment }}'
+          const message = `Deployment to ${environment} ${status === 'success' ? '✅ succeeded' : '❌ failed'}`
+          
+          // Add comment to PR
+          if (github.context.eventName === 'pull_request') {
+            await github.rest.issues.createComment({
+              issue_number: github.context.issue.number,
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              body: message
+            })
+          }
+
+  # ============================================
+  # DEPLOY DATABASE MIGRATIONS
+  # ============================================
+  
+  database-migrations:
+    name: Database Migrations
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run database migrations
+      run: |
+        npx prisma migrate deploy --schema=./packages/database/prisma/schema.prisma
+      env:
+        DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+    
+    - name: Verify migrations
+      run: |
+        npx prisma db pull --schema=./packages/database/prisma/schema.prisma
+    
+    - name: Backup after migration
+      run: |
+        ./scripts/backup.sh
+      env:
+        DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BACKUP_BUCKET }}
+
+  # ============================================
+  # CLEANUP
+  # ============================================
+  
+  cleanup:
+    name: Cleanup Old Images
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    
+    steps:
+    - name: Delete old container images
+      uses: actions/delete-package-versions@v4
+      with:
+        package-name: 'web'
+        min-versions-to-keep: 10
+    - name: Delete old container images
+      uses: actions/delete-package-versions@v4
+      with:
+        package-name: 'api'
+        min-versions-to-keep: 10
+    - name: Delete old container images
+      uses: actions/delete-package-versions@v4
+      with:
+        package-name: 'ai'
+        min-versions-to-keep: 10
+    - name: Delete old container images
+      uses: actions/delete-package-versions@v4
+      with:
+        package-name: 'admin'
+        min-versions-to-keep: 10
