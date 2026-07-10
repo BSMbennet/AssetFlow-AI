@@ -1,0 +1,1170 @@
+// ============================================
+// ASSETFLOW AI - Database Schema
+// Version: 1.0
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "jsonProtocol", "prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+model User {
+  id                 String            @id @default(uuid())
+  email              String            @unique
+  firstName          String
+  lastName           String
+  displayName        String?
+  phone              String?
+  role               UserRole          @default(INVESTOR)
+  status             UserStatus        @default(ACTIVE)
+  organizationId     String
+  walletAddress      String?
+  walletType         String?
+  emailVerified      Boolean           @default(false)
+  mfaEnabled         Boolean           @default(false)
+  mfaMethod          MFAMethod?
+  mfaSecret          String?
+  passwordHash       String
+  lastLoginAt        DateTime?
+  preferences        Json              @default("{}")
+  avatarUrl          String?
+  timezone           String            @default("UTC")
+  language           String            @default("en")
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deletedAt          DateTime?
+
+  // Relations
+  organization       Organization      @relation(fields: [organizationId], references: [id])
+  sessions           Session[]
+  refreshTokens      RefreshToken[]
+  kycChecks          KycCheck[]
+  amlChecks          AmlCheck[]
+  assets             Asset[]
+  orders             Order[]
+  payments           Payment[]
+  wallets            Wallet[]
+  tokenHolders       TokenHolder[]
+  activities         Activity[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]        @relation("UserAuditLogs")
+  passwordResets     PasswordReset[]
+  invites            UserInvite[]      @relation("InvitedUser")
+  sentInvites        UserInvite[]      @relation("InvitedBy")
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([status])
+  @@index([walletAddress])
+  @@index([deletedAt])
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  userId       String
+  token        String    @unique
+  refreshToken String    @unique
+  expiresAt    DateTime
+  ipAddress    String
+  userAgent    String
+  deviceType   String?
+  revoked      Boolean   @default(false)
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+  @@index([refreshToken])
+  @@index([expiresAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  revoked   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  used      Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model UserInvite {
+  id             String    @id @default(uuid())
+  email          String
+  organizationId String
+  role           UserRole
+  invitedBy      String
+  invitedAt      DateTime  @default(now())
+  acceptedAt     DateTime?
+  expiresAt      DateTime
+  status         InviteStatus @default(PENDING)
+
+  invitedUser    User      @relation(fields: [invitedBy], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([status])
+  @@unique([email, organizationId])
+}
+
+enum UserRole {
+  PLATFORM_ADMIN
+  ORG_ADMIN
+  ASSET_MANAGER
+  COMPLIANCE_OFFICER
+  INVESTOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  INVITED
+}
+
+enum MFAMethod {
+  TOTP
+  SMS
+  EMAIL
+  WEBAUTHN
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// ============================================
+// ORGANIZATIONS
+// ============================================
+
+model Organization {
+  id                String                    @id @default(uuid())
+  name              String
+  legalName         String
+  type              OrganizationType          @default(OTHER)
+  status            OrganizationStatus        @default(ACTIVE)
+  registrationNumber String                   @unique
+  taxId             String
+  country           String
+  city              String
+  address           String
+  postalCode        String
+  website           String?
+  contactEmail      String
+  contactPhone      String
+  settings          Json                      @default("{}")
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  deletedAt         DateTime?
+
+  // Relations
+  users             User[]
+  assets            Asset[]
+  complianceCases   ComplianceCase[]
+  settingsConfig    OrganizationSetting[]
+  invites           UserInvite[]
+  apiKeys           ApiKey[]
+
+  @@index([name])
+  @@index([status])
+  @@index([type])
+  @@index([deletedAt])
+}
+
+model OrganizationSetting {
+  id             String    @id @default(uuid())
+  organizationId String
+  key            String
+  value          Json
+  type           String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+}
+
+enum OrganizationType {
+  BANK
+  PROPERTY_DEVELOPER
+  INVESTMENT_FIRM
+  GOVERNMENT
+  ASSET_MANAGER
+  INSURANCE
+  PENSION_FUND
+  HEDGE_FUND
+  FAMILY_OFFICE
+  OTHER
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+  VERIFIED
+  REJECTED
+}
+
+// ============================================
+// ASSETS
+// ============================================
+
+model Asset {
+  id               String          @id @default(uuid())
+  organizationId   String
+  name             String
+  description      String
+  type             AssetType
+  status           AssetStatus     @default(DRAFT)
+  totalValue       Decimal         @db.Decimal(20, 2)
+  tokenPrice       Decimal         @db.Decimal(20, 2)
+  totalTokens      BigInt
+  availableTokens  BigInt
+  jurisdiction     String
+  metadata         Json            @default("{}")
+  tokenAddress     String?
+  contractAddress  String?
+  riskScore        Float?
+  riskLevel        RiskLevel?
+  maturityDate     DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+
+  // Relations
+  organization     Organization    @relation(fields: [organizationId], references: [id])
+  createdBy        User            @relation(fields: [createdById], references: [id])
+  createdById      String
+  documents        AssetDocument[]
+  images           AssetImage[]
+  valuations       AssetValuation[]
+  tokens           Token[]
+  orders           Order[]
+  trades           Trade[]
+  dividends        Dividend[]
+  riskScores       RiskScore[]
+  investmentMemos  InvestmentMemo[]
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([status])
+  @@index([createdById])
+  @@index([deletedAt])
+}
+
+model AssetDocument {
+  id           String          @id @default(uuid())
+  assetId      String
+  name         String
+  type         String
+  category     String
+  url          String
+  mimeType     String
+  size         Int
+  uploadedBy   String
+  verified     Boolean         @default(false)
+  verifiedAt   DateTime?
+  aiAnalysis   Json?
+  tags         String[]
+  version      Int             @default(1)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  asset        Asset           @relation(fields: [assetId], references: [id])
+
+  @@index([assetId])
+  @@index([verified])
+  @@index([type])
+}
+
+model AssetImage {
+  id           String   @id @default(uuid())
+  assetId      String
+  url          String
+  thumbnailUrl String?
+  caption      String?
+  isPrimary    Boolean  @default(false)
+  order        Int      @default(0)
+  tags         String[]
+  createdAt    DateTime @default(now())
+
+  asset        Asset    @relation(fields: [assetId], references: [id])
+
+  @@index([assetId])
+  @@index([isPrimary])
+}
+
+model AssetValuation {
+  id           String          @id @default(uuid())
+  assetId      String
+  value        Decimal         @db.Decimal(20, 2)
+  currency     String          @default("USD")
+  method       ValuationMethod
+  provider     String
+  reportUrl    String?
+  aiConfidence Float?
+  notes        String?
+  createdAt    DateTime        @default(now())
+  expiresAt    DateTime?
+
+  asset        Asset           @relation(fields: [assetId], references: [id])
+
+  @@index([assetId])
+  @@index([createdAt])
+  @@index([method])
+}
+
+enum AssetType {
+  REAL_ESTATE
+  AGRICULTURE
+  INFRASTRUCTURE
+  RENEWABLE_ENERGY
+  BONDS
+  PRIVATE_EQUITY
+  CARBON_CREDITS
+  INVOICE_FINANCING
+  COMMODITIES
+  ART
+  COLLECTIBLES
+  INTELLECTUAL_PROPERTY
+  SHIPPING
+  AVIATION
+  OTHER
+}
+
+enum AssetStatus {
+  DRAFT
+  PENDING_REVIEW
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  TOKENIZED
+  ACTIVE
+  SUSPENDED
+  MATURED
+  LIQUIDATED
+  EXPIRED
+}
+
+enum ValuationMethod {
+  APPRAISAL
+  AI
+  MARKET
+  COST
+  INCOME
+  HYBRID
+}
+
+enum RiskLevel {
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+}
+
+// ============================================
+// COMPLIANCE
+// ============================================
+
+model KycCheck {
+  id                 String          @id @default(uuid())
+  userId             String
+  status             KycStatus       @default(NOT_STARTED)
+  provider           String
+  providerReference  String?
+  submittedAt        DateTime        @default(now())
+  reviewedAt         DateTime?
+  reviewedBy         String?
+  notes              String?
+  expiresAt          DateTime?
+  result             Json?
+
+  user               User            @relation(fields: [userId], references: [id])
+  documents          KycDocument[]
+  complianceCases    ComplianceCase[] @relation("KycComplianceCase")
+
+  @@index([userId])
+  @@index([status])
+  @@index([provider])
+}
+
+model KycDocument {
+  id                String      @id @default(uuid())
+  kycCheckId        String
+  type              DocumentType
+  number            String?
+  issuingCountry    String?
+  issuingAuthority  String?
+  expiryDate        DateTime?
+  dateOfBirth       DateTime?
+  fileUrl           String
+  verified          Boolean     @default(false)
+  verifiedAt        DateTime?
+  verificationData  Json?
+  ocrData           Json?
+
+  kycCheck          KycCheck    @relation(fields: [kycCheckId], references: [id])
+
+  @@index([kycCheckId])
+  @@index([type])
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+  EXPIRED
+  INCOMPLETE
+}
+
+enum DocumentType {
+  PASSPORT
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  PROOF_OF_ADDRESS
+  UTILITY_BILL
+  BANK_STATEMENT
+  TAX_RETURN
+  FINANCIAL_STATEMENT
+  BUSINESS_LICENSE
+  REGISTRATION_DOCUMENT
+  CERTIFICATE_OF_INCORPORATION
+  ACCREDITATION_LETTER
+  OTHER
+}
+
+model AmlCheck {
+  id             String        @id @default(uuid())
+  userId         String
+  provider       String
+  riskLevel      AmlRiskLevel
+  score          Float
+  sanctionsMatch Boolean       @default(false)
+  pepMatch       Boolean       @default(false)
+  adverseMedia   Boolean       @default(false)
+  reportUrl      String?
+  checkedAt      DateTime      @default(now())
+  expiresAt      DateTime
+  screeningData  Json?
+
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([riskLevel])
+  @@index([checkedAt])
+}
+
+enum AmlRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model ComplianceCase {
+  id             String          @id @default(uuid())
+  type           ComplianceCaseType
+  status         ComplianceCaseStatus @default(OPEN)
+  priority       CompliancePriority @default(MEDIUM)
+  assignedTo     String?
+  userId         String?
+  organizationId String?
+  description    String
+  findings       String?
+  resolution     String?
+  attachments    String[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  closedAt       DateTime?
+
+  user           User?           @relation(fields: [userId], references: [id])
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  kycCheck       KycCheck?       @relation("KycComplianceCase", fields: [kycCheckId], references: [id])
+  kycCheckId     String?
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([priority])
+}
+
+enum ComplianceCaseType {
+  KYC
+  AML
+  SANCTIONS
+  PEP
+  FRAUD
+  ADVERSE_MEDIA
+  COMPLAINT
+  AUDIT
+  OTHER
+}
+
+enum ComplianceCaseStatus {
+  OPEN
+  INVESTIGATING
+  ESCALATED
+  CLOSED
+}
+
+enum CompliancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model AuditLog {
+  id            String    @id @default(uuid())
+  userId        String?
+  userName      String?
+  organizationId String?
+  action        String
+  resource      String
+  resourceId    String?
+  changes       Json
+  ipAddress     String
+  userAgent     String
+  sessionId     String?
+  createdAt     DateTime  @default(now())
+
+  user          User?     @relation("UserAuditLogs", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([resource])
+  @@index([resourceId])
+}
+
+model RegulatoryReport {
+  id             String    @id @default(uuid())
+  organizationId String
+  type           String
+  period         String
+  startDate      DateTime
+  endDate        DateTime
+  data           Json
+  generatedAt    DateTime  @default(now())
+  filedAt        DateTime?
+  status         String    @default("DRAFT")
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([period])
+}
+
+// ============================================
+// TOKENS & BLOCKCHAIN
+// ============================================
+
+model Token {
+  id             String          @id @default(uuid())
+  assetId        String
+  address        String          @unique
+  network        String
+  standard       TokenStandard
+  name           String
+  symbol         String
+  decimals       Int
+  totalSupply    BigInt
+  tokenPrice     Decimal         @db.Decimal(20, 2)
+  metadata       Json            @default("{}")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  asset          Asset           @relation(fields: [assetId], references: [id])
+  holders        TokenHolder[]
+  transactions   BlockchainTransaction[]
+
+  @@index([assetId])
+  @@index([address])
+  @@index([network])
+}
+
+model TokenHolder {
+  id             String    @id @default(uuid())
+  tokenId        String
+  userId         String
+  walletAddress  String
+  balance        BigInt
+  locked         BigInt    @default(0)
+  staked         BigInt    @default(0)
+  acquiredAt     DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastTransactionAt DateTime?
+
+  token          Token     @relation(fields: [tokenId], references: [id])
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@unique([tokenId, userId])
+  @@index([tokenId])
+  @@index([userId])
+  @@index([walletAddress])
+}
+
+model BlockchainTransaction {
+  id             String          @id @default(uuid())
+  hash           String          @unique
+  from           String
+  to             String
+  value          Decimal         @db.Decimal(40, 18)
+  gasUsed        BigInt
+  gasPrice       BigInt
+  status         TransactionStatus @default(PENDING)
+  blockNumber    BigInt?
+  blockHash      String?
+  timestamp      DateTime        @default(now())
+  data           Json?
+  confirmations  Int             @default(0)
+  transactionIndex Int?
+  receipt        Json?
+
+  token          Token?          @relation(fields: [tokenId], references: [id])
+  tokenId        String?
+
+  @@index([hash])
+  @@index([from])
+  @@index([to])
+  @@index([status])
+  @@index([timestamp])
+}
+
+model SmartContract {
+  id             String    @id @default(uuid())
+  name           String
+  address        String    @unique
+  network        String
+  standard       TokenStandard
+  version        String
+  abi            Json
+  bytecode       String
+  deployedAt     DateTime  @default(now())
+  verified       Boolean   @default(false)
+  sourceCode     String?
+  compilerVersion String?
+  optimizationUsed Boolean @default(false)
+
+  @@index([address])
+  @@index([network])
+  @@index([standard])
+}
+
+model BlockchainEvent {
+  id             String    @id @default(uuid())
+  contractAddress String
+  eventName      String
+  blockNumber    BigInt
+  transactionHash String
+  logIndex       Int
+  args           Json
+  timestamp      DateTime
+  processed      Boolean   @default(false)
+  processedAt    DateTime?
+
+  @@index([contractAddress])
+  @@index([eventName])
+  @@index([blockNumber])
+  @@index([processed])
+  @@index([transactionHash])
+}
+
+enum TokenStandard {
+  ERC20
+  ERC721
+  ERC1155
+  ERC777
+  ERC1400
+  SPL
+  OTHER
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REVERTED
+  DROPPED
+}
+
+// ============================================
+// TRADING
+// ============================================
+
+model Order {
+  id             String       @id @default(uuid())
+  assetId        String
+  userId         String
+  type           OrderType
+  side           OrderSide
+  price          Decimal      @db.Decimal(20, 2)
+  amount         BigInt
+  filledAmount   BigInt       @default(0)
+  remainingAmount BigInt
+  averagePrice   Decimal?     @db.Decimal(20, 2)
+  status         OrderStatus  @default(PENDING)
+  timeInForce    OrderTimeInForce @default(GTC)
+  expiresAt      DateTime?
+  stopPrice      Decimal?     @db.Decimal(20, 2)
+  limitPrice     Decimal?     @db.Decimal(20, 2)
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  executedAt     DateTime?
+
+  asset          Asset        @relation(fields: [assetId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+  trades         Trade[]
+
+  @@index([assetId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Trade {
+  id               String   @id @default(uuid())
+  orderId          String
+  assetId          String
+  buyerId          String
+  sellerId         String
+  price            Decimal  @db.Decimal(20, 2)
+  amount           BigInt
+  total            Decimal  @db.Decimal(20, 2)
+  fee              Decimal  @db.Decimal(20, 2)
+  feeCurrency      String   @default("USD")
+  feeRate          Decimal  @db.Decimal(5, 4) @default(0.0025)
+  executedAt       DateTime @default(now())
+  settlementStatus SettlementStatus @default(PENDING)
+  settlementDate   DateTime?
+  transactionHash  String?
+
+  order            Order    @relation(fields: [orderId], references: [id])
+  asset            Asset    @relation(fields: [assetId], references: [id])
+  buyer            User     @relation(fields: [buyerId], references: [id])
+  seller           User     @relation(fields: [sellerId], references: [id])
+
+  @@index([orderId])
+  @@index([assetId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([executedAt])
+  @@index([settlementStatus])
+}
+
+model Position {
+  id               String          @id @default(uuid())
+  userId           String
+  assetId          String
+  tokenId          String?
+  quantity         BigInt
+  averagePrice     Decimal         @db.Decimal(20, 2)
+  currentPrice     Decimal         @db.Decimal(20, 2)
+  totalValue       Decimal         @db.Decimal(20, 2)
+  realizedPnL      Decimal         @db.Decimal(20, 2) @default(0)
+  unrealizedPnL    Decimal         @db.Decimal(20, 2) @default(0)
+  unrealizedPnLPercent Decimal      @db.Decimal(5, 2) @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  user             User            @relation(fields: [userId], references: [id])
+  asset            Asset           @relation(fields: [assetId], references: [id])
+
+  @@unique([userId, assetId])
+  @@index([userId])
+  @@index([assetId])
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+  STOP
+  STOP_LIMIT
+  TRAILING_STOP
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderTimeInForce {
+  GTC
+  IOC
+  FOK
+  DAY
+  GTD
+}
+
+enum OrderStatus {
+  PENDING
+  OPEN
+  PARTIALLY_FILLED
+  FILLED
+  CANCELLED
+  REJECTED
+  EXPIRED
+}
+
+enum SettlementStatus {
+  PENDING
+  SETTLED
+  FAILED
+  PARTIALLY_SETTLED
+}
+
+// ============================================
+// PAYMENTS & WALLETS
+// ============================================
+
+model Payment {
+  id               String         @id @default(uuid())
+  userId           String
+  organizationId   String?
+  amount           Decimal        @db.Decimal(20, 2)
+  currency         String         @default("USD")
+  method           PaymentMethod
+  provider         String
+  providerReference String?
+  status           PaymentStatus  @default(PENDING)
+  metadata         Json           @default("{}")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  completedAt      DateTime?
+  failedAt         DateTime?
+  failureReason    String?
+
+  user             User           @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([provider])
+  @@index([providerReference])
+}
+
+model Wallet {
+  id               String   @id @default(uuid())
+  userId           String
+  address          String   @unique
+  network          String
+  balance          Decimal  @db.Decimal(40, 18)
+  currency         String   @default("USD")
+  isDefault        Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
+
+  user             User     @relation(fields: [userId], references: [id])
+  transactions     WalletTransaction[]
+
+  @@index([userId])
+  @@index([address])
+  @@index([isActive])
+}
+
+model WalletTransaction {
+  id               String          @id @default(uuid())
+  walletId         String
+  transactionHash  String          @unique
+  type             WalletTransactionType
+  amount           Decimal         @db.Decimal(40, 18)
+  currency         String
+  status           String          @default("PENDING")
+  confirmations    Int             @default(0)
+  sender           String?
+  recipient        String?
+  fee              Decimal         @db.Decimal(20, 2) @default(0)
+  metadata         Json            @default("{}")
+  createdAt        DateTime        @default(now())
+  confirmedAt      DateTime?
+
+  wallet           Wallet          @relation(fields: [walletId], references: [id])
+
+  @@index([walletId])
+  @@index([transactionHash])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  STABLECOIN
+  CRYPTO
+  CARD
+  DIGITAL_WALLET
+  ACH
+  WIRE
+  USDC
+  USDT
+  DAI
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+  SETTLED
+  REVERSED
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  PAYMENT
+  REFUND
+}
+
+model Dividend {
+  id               String          @id @default(uuid())
+  assetId          String
+  amount           Decimal         @db.Decimal(20, 2)
+  currency         String          @default("USD")
+  perToken         Decimal         @db.Decimal(20, 10)
+  recordDate       DateTime
+  paymentDate      DateTime
+  status           DividendStatus  @default(DECLARED)
+  paidAt           DateTime?
+  distribution     Json
+  metadata         Json            @default("{}")
+
+  asset            Asset           @relation(fields: [assetId], references: [id])
+
+  @@index([assetId])
+  @@index([status])
+  @@index([paymentDate])
+}
+
+enum DividendStatus {
+  DECLARED
+  PAID
+  CANCELLED
+  SCHEDULED
+}
+
+// ============================================
+// AI & ANALYTICS
+// ============================================
+
+model AIAnalysis {
+  id             String    @id @default(uuid())
+  documentId     String
+  type           String
+  results        Json
+  confidence     Float
+  summary        String
+  keyFindings    String[]
+  recommendations String[]
+  createdAt      DateTime  @default(now())
+  metadata       Json?
+
+  @@index([documentId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model RiskScore {
+  id             String          @id @default(uuid())
+  assetId        String
+  score          Float
+  factors        Json
+  level          RiskLevel
+  summary        String
+  details        Json
+  recommendations String[]
+  createdAt      DateTime        @default(now())
+  expiresAt      DateTime?
+
+  asset          Asset           @relation(fields: [assetId], references: [id])
+
+  @@index([assetId])
+  @@index([level])
+  @@index([createdAt])
+}
+
+model InvestmentMemo {
+  id             String    @id @default(uuid())
+  assetId        String
+  generatedBy    String
+  content        String
+  sections       Json
+  keyMetrics     Json
+  version        Int       @default(1)
+  approvedBy     String?
+  approvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  asset          Asset     @relation(fields: [assetId], references: [id])
+
+  @@index([assetId])
+  @@index([createdAt])
+}
+
+model AIAgent {
+  id             String    @id @default(uuid())
+  name           String
+  type           String
+  status         String    @default("ACTIVE")
+  model          String
+  version        String
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([type])
+  @@index([status])
+}
+
+model AIWorkflow {
+  id             String    @id @default(uuid())
+  name           String
+  description    String
+  steps          Json
+  status         String    @default("DRAFT")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  executionHistory Json?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// ACTIVITY & NOTIFICATIONS
+// ============================================
+
+model Activity {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String
+  description   String
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Notification {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String
+  title         String
+  message       String
+  data          Json?     @default("{}")
+  read          Boolean   @default(false)
+  readAt        DateTime?
+  priority      String    @default("MEDIUM")
+  channel       String    @default("IN_APP")
+  createdAt     DateTime  @default(now())
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@index([priority])
+}
+
+// ============================================
+// SETTINGS & CONFIGURATION
+// ============================================
+
+model ApiKey {
+  id            String    @id @default(uuid())
+  organizationId String
+  userId        String
+  name          String
+  key           String    @unique
+  permissions   String[]
+  expiresAt     DateTime?
+  lastUsedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([key])
+}
+
+model SystemSetting {
+  id            String    @id @default(uuid())
+  key           String    @unique
+  value         Json
+  type          String
+  description   String?
+  updatedBy     String?
+  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime  @default(now())
+}
+
+model CacheEntry {
+  id            String    @id @default(uuid())
+  key           String    @unique
+  value         Json
+  ttl           Int
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+
+  @@index([key])
+  @@index([expiresAt])
+}
