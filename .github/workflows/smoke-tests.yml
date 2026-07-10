@@ -1,0 +1,50 @@
+# ============================================
+# SMOKE TESTS WORKFLOW
+# ============================================
+
+name: Smoke Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+
+jobs:
+  smoke-tests:
+    name: Run Smoke Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run smoke tests
+      run: npm run test:smoke -- --environment=${{ github.event.inputs.environment }}
+      env:
+        API_URL: ${{ secrets[format('{0}_API_URL', github.event.inputs.environment)] }}
+        AI_URL: ${{ secrets[format('{0}_AI_URL', github.event.inputs.environment)] }}
+        TEST_API_KEY: ${{ secrets[format('{0}_TEST_API_KEY', github.event.inputs.environment)] }}
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: smoke-test-results
+        path: smoke-test-results/
