@@ -1,0 +1,26 @@
+# ============================================
+# ASSETFLOW AI - Hardhat Blockchain Node
+# ============================================
+
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY contracts/package*.json ./
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# Copy contract source
+COPY contracts ./
+
+# Compile contracts
+RUN npx hardhat compile
+
+# Expose Hardhat RPC port
+EXPOSE 8545
+
+# Start Hardhat node
+CMD ["npx", "hardhat", "node", "--hostname", "0.0.0.0"]
