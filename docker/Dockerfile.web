@@ -1,1 +1,63 @@
+# ============================================
+# ASSETFLOW AI - Web Application
+# ============================================
 
+FROM node:18-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy root package files
+COPY package*.json ./
+COPY turbo.json ./
+COPY apps/web/package*.json ./apps/web/
+COPY packages/shared-types/package*.json ./packages/shared-types/
+COPY packages/ui/package*.json ./packages/ui/
+COPY packages/database/package*.json ./packages/database/
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# Copy source code
+COPY apps/web ./apps/web
+COPY packages/shared-types ./packages/shared-types
+COPY packages/ui ./packages/ui
+COPY packages/database ./packages/database
+
+# Build shared packages
+RUN npm run build --workspace=@assetflow/shared-types
+RUN npm run build --workspace=@assetflow/ui
+
+# Build Next.js application
+RUN npm run build --workspace=@assetflow/web
+
+# ============================================
+# Production Image
+# ============================================
+
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Copy necessary files from builder
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
+
+# Copy shared packages
+COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=builder /app/packages/shared-types/package.json ./packages/shared-types/package.json
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
+
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "apps/web/server.js"]
