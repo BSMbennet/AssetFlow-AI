@@ -1,0 +1,105 @@
+# ============================================
+# DEPENDABOT CONFIGURATION
+# ============================================
+
+version: 2
+updates:
+  # NPM packages
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    versioning-strategy: "increase"
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+    ignore:
+      - dependency-name: "typescript"
+        versions: ["<5.0.0"]
+      - dependency-name: "@types/node"
+        versions: ["<20.0.0"]
+    reviewers:
+      - "platform-team"
+
+  # Python packages
+  - package-ecosystem: "pip"
+    directory: "/apps/ai-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    versioning-strategy: "increase"
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+    reviewers:
+      - "ai-team"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci-cd"
+    commit-message:
+      prefix: "ci"
+    reviewers:
+      - "platform-team"
+
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker)"
+    reviewers:
+      - "platform-team"
+
+  # Terraform
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure/terraform"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    labels:
+      - "dependencies"
+      - "infrastructure"
+      - "terraform"
+    commit-message:
+      prefix: "chore(terraform)"
+    reviewers:
+      - "devops-team"
