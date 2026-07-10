@@ -1,0 +1,35 @@
+# ============================================
+# ASSETFLOW AI - Persistent Volumes
+# ============================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-models-pvc
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: ai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: gp2
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-uploads-pvc
+  namespace: assetflow
+  labels:
+    app: assetflow
+    component: ai
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: gp2
