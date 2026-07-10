@@ -1,20 +1,159 @@
 # ============================================
-# ASSETFLOW AI - AI Service
+# ASSETFLOW AI - AI Service Deployment
 # ============================================
 
-apiVersion: v1
-kind: Service
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: assetflow-ai
   namespace: assetflow
   labels:
     app: assetflow-ai
+    tier: backend
+    component: ai-service
 spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
-    app: assetflow-ai
-  ports:
-  - port: 8000
-    targetPort: 8000
-    name: http
-    protocol: TCP
-  type: ClusterIP
+    matchLabels:
+      app: assetflow-ai
+  template:
+    metadata:
+      labels:
+        app: assetflow-ai
+        tier: backend
+        component: ai-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: assetflow-ai
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: ai-service
+        image: assetflow/ai:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-secrets
+              key: database_url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-secrets
+              key: redis_url
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-secrets
+              key: openai_api_key
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: log_level
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: debug
+        - name: CORS_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: ai-config
+              key: cors_origins
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 30
+        volumeMounts:
+        - name: ai-models
+          mountPath: /app/models
+        - name: ai-uploads
+          mountPath: /app/uploads
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: ai-models
+        persistentVolumeClaim:
+          claimName: ai-models-pvc
+      - name: ai-uploads
+        emptyDir: {}
+      terminationGracePeriodSeconds: 120
+      serviceAccountName: assetflow-ai-sa
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: assetflow-ai-hpa
+  namespace: assetflow
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: assetflow-ai
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
