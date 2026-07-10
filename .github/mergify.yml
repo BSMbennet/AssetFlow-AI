@@ -1,0 +1,156 @@
+# ============================================
+# MERGIFY CONFIGURATION
+# ============================================
+
+queue_rules:
+  - name: default
+    conditions:
+      - "#approved-reviews-by>=1"
+      - "check-success=build"
+      - "check-success=test"
+      - "check-success=security"
+      - "label!=blocked"
+      - "label!=wip"
+
+  - name: urgent
+    conditions:
+      - "#approved-reviews-by>=1"
+      - "check-success=build"
+      - "check-success=test"
+      - "check-success=security"
+      - "label=critical"
+      - "label!=blocked"
+
+pull_request_rules:
+  - name: automatically merge when ready
+    conditions:
+      - "base=main"
+      - "label=auto-merge"
+      - "check-success=build"
+      - "check-success=test"
+      - "check-success=security"
+      - "#approved-reviews-by>=1"
+      - "label!=blocked"
+      - "label!=wip"
+    actions:
+      queue:
+        name: default
+        method: squash
+        commit_message_template: |
+          {{ title }} (#{{ number }})
+          {{ body }}
+
+  - name: automatically merge dependabot PRs
+    conditions:
+      - "author=dependabot[bot]"
+      - "base=main"
+      - "check-success=build"
+      - "check-success=test"
+      - "check-success=security"
+    actions:
+      queue:
+        name: default
+        method: squash
+        commit_message_template: |
+          chore(deps): {{ title }} (#{{ number }})
+
+  - name: warn on conflicts
+    conditions:
+      - "conflict"
+    actions:
+      comment:
+        message: |
+          ⚠️ This PR has conflicts. Please resolve them before merging.
+
+  - name: request changes on big PRs
+    conditions:
+      - "files>=100"
+    actions:
+      comment:
+        message: |
+          📏 This PR has {{ files }} files changed. Please break it down into smaller, more focused PRs.
+
+  - name: label PRs by size
+    conditions:
+      - "files<10"
+    actions:
+      label:
+        add: ["size:xs"]
+
+  - name: label PRs by size
+    conditions:
+      - "files>=10"
+      - "files<30"
+    actions:
+      label:
+        add: ["size:s"]
+
+  - name: label PRs by size
+    conditions:
+      - "files>=30"
+      - "files<100"
+    actions:
+      label:
+        add: ["size:m"]
+
+  - name: label PRs by size
+    conditions:
+      - "files>=100"
+      - "files<300"
+    actions:
+      label:
+        add: ["size:l"]
+
+  - name: label PRs by size
+    conditions:
+      - "files>=300"
+    actions:
+      label:
+        add: ["size:xl"]
+
+  - name: automatically label security PRs
+    conditions:
+      - "files~=^.*(security|auth|jwt|encryption|crypto|vault).*$"
+    actions:
+      label:
+        add: ["security"]
+
+  - name: automatically label API PRs
+    conditions:
+      - "files~=^apps/api/.*$"
+    actions:
+      label:
+        add: ["backend", "api"]
+
+  - name: automatically label AI PRs
+    conditions:
+      - "files~=^apps/ai-service/.*$"
+    actions:
+      label:
+        add: ["ai"]
+
+  - name: automatically label blockchain PRs
+    conditions:
+      - "files~=^contracts/.*$"
+      - "files~=^packages/blockchain-utils/.*$"
+    actions:
+      label:
+        add: ["blockchain"]
+
+  - name: automatically label frontend PRs
+    conditions:
+      - "files~=^apps/web/.*$"
+      - "files~=^apps/admin/.*$"
+      - "files~=^packages/ui/.*$"
+    actions:
+      label:
+        add: ["frontend"]
+
+  - name: automatically label infrastructure PRs
+    conditions:
+      - "files~=^infrastructure/.*$"
+      - "files~=^docker/.*$"
+      - "files~=^.github/workflows/.*$"
+    actions:
+      label:
+        add: ["infrastructure"]
