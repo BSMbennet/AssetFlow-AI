@@ -1,0 +1,20 @@
+# ============================================
+# ASSETFLOW AI - Web Service
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetflow-web
+  namespace: assetflow
+  labels:
+    app: assetflow-web
+spec:
+  selector:
+    app: assetflow-web
+  ports:
+  - port: 3000
+    targetPort: 3000
+    name: http
+    protocol: TCP
+  type: ClusterIP
