@@ -1,0 +1,51 @@
+# ============================================
+# ASSETFLOW AI - Kustomization
+# ============================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: assetflow
+
+resources:
+  - namespaces/assetflow.yaml
+  - configmaps/api-config.yaml
+  - configmaps/web-config.yaml
+  - configmaps/ai-config.yaml
+  - secrets/api-secrets.yaml
+  - secrets/ai-secrets.yaml
+  - deployments/api.yaml
+  - deployments/ai-service.yaml
+  - deployments/web.yaml
+  - services/api.yaml
+  - services/ai-service.yaml
+  - services/web.yaml
+  - ingress/ingress.yaml
+  - storage/persistent-volumes.yaml
+  - service-accounts/api-sa.yaml
+  - network-policies/network-policy.yaml
+  - monitoring/prometheus.yaml
+
+images:
+- name: assetflow/api
+  newName: assetflow/api
+  newTag: latest
+- name: assetflow/ai
+  newName: assetflow/ai
+  newTag: latest
+- name: assetflow/web
+  newName: assetflow/web
+  newTag: latest
+
+commonLabels:
+  managed-by: kustomize
+  environment: production
+
+patchesStrategicMerge:
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: assetflow-api
+  spec:
+    replicas: 3
