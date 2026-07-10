@@ -1,0 +1,33 @@
+# ============================================
+# CODEOWNERS - AssetFlow AI
+# ============================================
+
+# Default owners
+* @assetflow/platform-team
+
+# Backend
+/apps/api/ @assetflow/backend-team
+/apps/ai-service/ @assetflow/ai-team
+/packages/database/ @assetflow/backend-team
+/packages/shared-types/ @assetflow/backend-team
+
+# Frontend
+/apps/web/ @assetflow/frontend-team
+/apps/admin/ @assetflow/frontend-team
+/packages/ui/ @assetflow/frontend-team
+
+# Blockchain
+/contracts/ @assetflow/blockchain-team
+/packages/blockchain-utils/ @assetflow/blockchain-team
+
+# Infrastructure
+/infrastructure/ @assetflow/devops-team
+/docker/ @assetflow/devops-team
+/.github/workflows/ @assetflow/devops-team
+
+# Documentation
+/docs/ @assetflow/platform-team
+
+# Security sensitive files
+/.github/secrets/ @assetflow/platform-team @assetflow/security-team
+/infrastructure/kubernetes/secrets/ @assetflow/platform-team @assetflow/security-team
