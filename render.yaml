@@ -1,0 +1,50 @@
+services:
+  # 1. Primary REST API Engine
+  - type: web
+    name: assetflow-api
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build --filter=api
+    startCommand: npm run start:prod --filter=api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: assetflow-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: assetflow-cache
+          property: connectionString
+
+  # 2. BullMQ Worker Node
+  - type: worker
+    name: assetflow-worker
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build --filter=api
+    startCommand: node apps/api/dist/worker.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: assetflow-db
+          property: connectionString
+
+  # 3. Python AI microservice
+  - type: web
+    name: assetflow-ai-service
+    env: python
+    plan: starter
+    buildCommand: pip install -r apps/ai-service/requirements.txt
+    startCommand: uvicorn apps.ai-service.main:app --host 0.0.0.0 --port 10000
+
+databases:
+  - name: assetflow-db
+    plan: starter
+    postgresVersion: 16
+
+interfaces:
+  - name: assetflow-cache
+    type: redis
+    plan: starter
