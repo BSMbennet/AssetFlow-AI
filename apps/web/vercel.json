@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "npm run build --filter=web",
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://assetflow-api.onrender.com/:path*"
+    }
+  ]
+}
