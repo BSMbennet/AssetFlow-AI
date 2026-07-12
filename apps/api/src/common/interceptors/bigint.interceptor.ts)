@@ -1,0 +1,25 @@
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class BigIntInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map((data) => this.recursivelyTransformBigInt(data))
+    );
+  }
+
+  private recursivelyTransformBigInt(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    if (typeof obj === 'bigint') return obj.toString(); // Map to standard string structure safely
+    if (obj instanceof Date) return obj;
+    if (Array.isArray(obj)) return obj.map((item) => this.recursivelyTransformBigInt(item));
+    if (typeof obj === 'object') {
+      for (const key of Object.keys(obj)) {
+        obj[key] = this.recursivelyTransformBigInt(obj[key]);
+      }
+    }
+    return obj;
+  }
+}
