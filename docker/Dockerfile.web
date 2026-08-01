@@ -2,7 +2,7 @@
 # ASSETFLOW AI - Web Application
 # ============================================
 
-FROM node:18-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -35,7 +35,7 @@ RUN npm run build --workspace=@assetflow/web
 # Production Image
 # ============================================
 
-FROM node:18-alpine AS runner
+FROM node:25-alpine AS runner
 
 WORKDIR /app
 
