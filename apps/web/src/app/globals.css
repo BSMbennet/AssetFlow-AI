@@ -4,62 +4,102 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 4%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 222 35% 7%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 35% 7%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary: 188 92% 55%;
+    --primary-foreground: 222 47% 4%;
+    --secondary: 223 25% 12%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --muted: 223 20% 12%;
+    --muted-foreground: 215 16% 62%;
+    --accent: 278 88% 67%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 58%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 20% 16%;
+    --input: 220 20% 16%;
+    --ring: 188 92% 55%;
+    --radius: 0.9rem;
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
+  html, body { min-height: 100%; }
   body {
     @apply bg-background text-foreground;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(32, 211, 238, 0.08), transparent 28%),
+      radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.08), transparent 30%),
+      #05070b;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-balance { text-wrap: balance; }
+}
+
+@layer components {
+  .assetflow-shell { background: #05070b; color: #f5f7fb; }
+  .assetflow-sidebar {
+    background: rgba(8, 11, 17, 0.88);
+    border-color: rgba(255,255,255,.08);
+    backdrop-filter: blur(18px);
   }
+  .assetflow-brand {
+    background: linear-gradient(135deg, #22d3ee, #8b5cf6 65%, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .assetflow-nav-active {
+    background: linear-gradient(100deg, rgba(34,211,238,.18), rgba(139,92,246,.16));
+    box-shadow: inset 0 0 0 1px rgba(34,211,238,.18), 0 10px 30px rgba(34,211,238,.06);
+    color: white;
+  }
+  .assetflow-topbar {
+    background: rgba(5, 7, 11, .78);
+    border-color: rgba(255,255,255,.08);
+    backdrop-filter: blur(18px);
+  }
+  .assetflow-search {
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.08);
+    color: #f5f7fb;
+  }
+  .assetflow-search::placeholder { color: #737b8c; }
+  .assetflow-primary {
+    background: linear-gradient(100deg, #22d3ee, #8b5cf6);
+    color: #05070b;
+    box-shadow: 0 12px 30px rgba(34,211,238,.15);
+  }
+  .assetflow-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.09);
+    background:
+      radial-gradient(circle at 80% 25%, rgba(34,211,238,.24), transparent 28%),
+      radial-gradient(circle at 55% 85%, rgba(139,92,246,.22), transparent 34%),
+      linear-gradient(135deg, #0b1018, #070a10 55%, #0b0713);
+    box-shadow: 0 24px 80px rgba(0,0,0,.28);
+  }
+  .assetflow-orb {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: 8%;
+    top: 18%;
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 30%, #a5f3fc, #22d3ee 22%, #7c3aed 60%, transparent 72%);
+    opacity: .7;
+    box-shadow: 0 0 80px rgba(34,211,238,.25);
+  }
+  .assetflow-chip {
+    border: 1px solid rgba(255,255,255,.09);
+    background: rgba(255,255,255,.045);
+    color: #aab2c3;
+  }
+  .assetflow-muted { color: #7f8797; }
 }
