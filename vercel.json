@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
+  "installCommand": "npm install --workspace=@assetflow/web --include-workspace-root=false",
   "buildCommand": "npm run build --workspace=@assetflow/web",
-  "installCommand": "npm install",
   "devCommand": "npm run dev --workspace=@assetflow/web"
 }
