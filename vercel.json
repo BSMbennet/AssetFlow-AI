@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build --workspace=@assetflow/web",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev --workspace=@assetflow/web",
+  "outputDirectory": "apps/web/.next"
+}
