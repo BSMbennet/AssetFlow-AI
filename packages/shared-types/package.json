@@ -12,11 +12,11 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6",
-    "typescript": "^5.3.3",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "@typescript-eslint/parser": "^6.17.0"
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
+    "eslint": "^10.8.1",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0"
