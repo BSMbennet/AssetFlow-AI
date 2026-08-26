@@ -1,4 +1,4 @@
-import { ComplianceDashboard } from '@/components/compliance/ComplianceDashboard';
+import ComplianceDashboard from '@/components/compliance/ComplianceDashboard';
 import { Suspense } from 'react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
