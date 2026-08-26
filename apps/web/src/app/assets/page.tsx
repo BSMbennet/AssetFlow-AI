@@ -1,4 +1,4 @@
-import { AssetList } from '@/components/assets/AssetList';
+import AssetList from '@/components/assets/AssetList';
 import { Suspense } from 'react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
