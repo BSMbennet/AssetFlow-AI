@@ -1,4 +1,4 @@
-import { InvestorList } from '@/components/investors/InvestorList';
+import InvestorList from '@/components/investors/InvestorList';
 import { Suspense } from 'react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
