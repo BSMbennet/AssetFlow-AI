@@ -1,4 +1,4 @@
-import { SettingsDashboard } from '@/components/settings/SettingsDashboard';
+import SettingsDashboard from '@/components/settings/SettingsDashboard';
 import { Suspense } from 'react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
