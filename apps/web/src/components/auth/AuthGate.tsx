@@ -35,26 +35,77 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     else if (signUp && !result.data.session) setMessage('Check your email to confirm your account, then sign in.');
   }
 
-  if (loading) return <div className="min-h-screen grid place-items-center bg-gray-950 text-white">Loading AssetFlow…</div>;
+  if (loading) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-[#05070b] text-white">
+        <span className="text-sm text-white/50">Loading AssetFlow…</span>
+      </div>
+    );
+  }
+
   if (session) return <>{children}</>;
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white grid place-items-center px-6">
-      <form onSubmit={submit} className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl">
-        <div className="mb-8">
-          <p className="text-sm font-semibold tracking-widest text-cyan-400">ASSETFLOW AI</p>
-          <h1 className="mt-3 text-3xl font-semibold">Institutional asset intelligence</h1>
-          <p className="mt-2 text-sm text-gray-400">Sign in to manage private-credit assets and documents.</p>
+    <main className="relative min-h-screen overflow-hidden bg-[#05070b] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(34,211,238,0.12),transparent_28%),radial-gradient(circle_at_85%_20%,rgba(139,92,246,0.12),transparent_32%)]" />
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 pb-16 pt-16 sm:px-8 sm:pt-20 lg:px-12 lg:pt-24">
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/80 sm:text-base">AssetFlow AI</p>
+          <h1 className="mt-12 max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.04em] sm:mt-14 sm:text-6xl lg:text-7xl">
+            Institutional asset intelligence
+          </h1>
+          <p className="mt-8 max-w-2xl text-xl leading-8 text-white/75 sm:text-2xl sm:leading-9">
+            Sign in to manage private-credit assets and documents.
+          </p>
         </div>
-        <div className="space-y-4">
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="Work email" className="w-full rounded-lg border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-cyan-400" />
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={6} placeholder="Password" className="w-full rounded-lg border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-cyan-400" />
-        </div>
-        {error && <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
-        {message && <p className="mt-4 rounded-lg bg-emerald-500/10 p-3 text-sm text-emerald-300">{message}</p>}
-        <button className="mt-6 w-full rounded-lg bg-cyan-400 px-4 py-3 font-semibold text-slate-950 hover:bg-cyan-300">{signUp ? 'Create account' : 'Sign in'}</button>
-        <button type="button" onClick={() => setSignUp(!signUp)} className="mt-4 w-full text-sm text-gray-400 hover:text-white">{signUp ? 'Already have an account? Sign in' : 'Need an account? Create one'}</button>
-      </form>
+
+        <form onSubmit={submit} className="mt-10 w-full max-w-[430px] sm:mt-12">
+          <div className="space-y-3">
+            <label className="sr-only" htmlFor="email">Work email</label>
+            <input
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="Work email"
+              className="h-12 w-full rounded-lg border border-white/15 bg-white/[0.07] px-4 text-base text-white outline-none transition placeholder:text-white/35 focus:border-cyan-300/70 focus:bg-white/[0.09] focus:ring-2 focus:ring-cyan-300/10"
+            />
+            <label className="sr-only" htmlFor="password">Password</label>
+            <input
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              required
+              minLength={6}
+              autoComplete={signUp ? 'new-password' : 'current-password'}
+              placeholder="Password"
+              className="h-12 w-full rounded-lg border border-white/15 bg-white/[0.07] px-4 text-base text-white outline-none transition placeholder:text-white/35 focus:border-cyan-300/70 focus:bg-white/[0.09] focus:ring-2 focus:ring-cyan-300/10"
+            />
+          </div>
+
+          {error && <p className="mt-4 rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</p>}
+          {message && <p className="mt-4 rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">{message}</p>}
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="submit"
+              className="h-12 rounded-lg bg-white px-6 font-semibold text-[#05070b] transition hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-cyan-300/60"
+            >
+              {signUp ? 'Create account' : 'Sign in'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setSignUp(!signUp); setError(''); setMessage(''); }}
+              className="h-12 rounded-lg border border-white/10 bg-white/[0.04] px-5 text-left text-sm text-white/65 transition hover:bg-white/[0.08] hover:text-white"
+            >
+              {signUp ? 'Already have an account? Sign in' : 'Need an account? Create one'}
+            </button>
+          </div>
+        </form>
+      </div>
     </main>
   );
 }
