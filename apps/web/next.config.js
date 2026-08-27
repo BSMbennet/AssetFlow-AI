@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  typedRoutes: true,
-  turbopack: {},
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'assetflow.ai' },
