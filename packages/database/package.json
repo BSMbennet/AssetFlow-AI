@@ -24,8 +24,8 @@
     "@assetflow/shared-types": "*"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6",
-    "typescript": "^5.3.3",
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
     "ts-node": "^10.9.2"
   },
   "keywords": [
