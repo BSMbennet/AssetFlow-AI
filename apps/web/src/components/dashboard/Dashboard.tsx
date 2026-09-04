@@ -9,6 +9,7 @@ import { QuickActions } from './QuickActions';
 import { useAssets } from './AssetData';
 import { AssetDocuments } from './AssetDocuments';
 import { Phase3Workspace } from '@/components/compliance/Phase3Workspace';
+import { PortfolioMonitoringWorkspace } from '@/components/monitoring/PortfolioMonitoringWorkspace';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 
@@ -18,7 +19,7 @@ const navigation = [
   { icon: Coins, label: 'Tokenization', id: 'tokens' },
   { icon: Users, label: 'Investors', id: 'investors' },
   { icon: Shield, label: 'Compliance', id: 'compliance' },
-  { icon: BarChart3, label: 'Analytics', id: 'analytics' },
+  { icon: BarChart3, label: 'Portfolio Monitoring', id: 'monitoring' },
   { icon: Settings, label: 'Settings', id: 'settings' },
 ];
 
@@ -79,7 +80,7 @@ export function Dashboard() {
           </div>
         </header>
 
-        {activeTab === 'compliance' ? <Phase3Workspace /> : <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
+        {activeTab === 'compliance' ? <Phase3Workspace /> : activeTab === 'monitoring' ? <PortfolioMonitoringWorkspace /> : <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
           {activeTab === 'overview' && <>
             <section className="assetflow-hero rounded-3xl p-6 md:p-8">
               <div className="assetflow-orb pointer-events-none" />
