@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LayoutDashboard, Building, Coins, Users, Shield, BarChart3, Settings, Bell, Search, Plus, Loader2, FileUp, Sparkles, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building, Coins, Users, Shield, BarChart3, Settings, Bell, Search, Plus, Loader2, FileUp, Sparkles, LogOut, ArrowLeftRight } from 'lucide-react';
 import { StatsCards } from './StatsCards';
 import { ActivityFeed } from './ActivityFeed';
 import { AssetChart } from './AssetChart';
@@ -10,6 +10,7 @@ import { useAssets } from './AssetData';
 import { AssetDocuments } from './AssetDocuments';
 import { Phase3Workspace } from '@/components/compliance/Phase3Workspace';
 import { PortfolioMonitoringWorkspace } from '@/components/monitoring/PortfolioMonitoringWorkspace';
+import { Phase6TradingWorkspace } from '@/components/trading/Phase6TradingWorkspace';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 
@@ -20,6 +21,7 @@ const navigation = [
   { icon: Users, label: 'Investors', id: 'investors' },
   { icon: Shield, label: 'Compliance', id: 'compliance' },
   { icon: BarChart3, label: 'Portfolio Monitoring', id: 'monitoring' },
+  { icon: ArrowLeftRight, label: 'Trading & Liquidity', id: 'trading' },
   { icon: Settings, label: 'Settings', id: 'settings' },
 ];
 
@@ -80,7 +82,7 @@ export function Dashboard() {
           </div>
         </header>
 
-        {activeTab === 'compliance' ? <Phase3Workspace /> : activeTab === 'monitoring' ? <PortfolioMonitoringWorkspace /> : <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
+        {activeTab === 'compliance' ? <Phase3Workspace /> : activeTab === 'monitoring' ? <PortfolioMonitoringWorkspace /> : activeTab === 'trading' ? <Phase6TradingWorkspace /> : <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
           {activeTab === 'overview' && <>
             <section className="assetflow-hero rounded-3xl p-6 md:p-8">
               <div className="assetflow-orb pointer-events-none" />
