@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ThrottlerStorage, ThrottlerStorageRecord } from '@nestjs/throttler';
+import { ThrottlerStorage } from '@nestjs/throttler';
 import Redis from 'ioredis';
+
+interface RedisThrottlerStorageRecord {
+  totalHits: number;
+  timeToExpire: number;
+}
 
 const INCREMENT_WITH_EXPIRY = `
   local count = redis.call('INCR', KEYS[1])
@@ -31,7 +36,7 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     });
   }
 
-  async increment(key: string, ttl: number): Promise<ThrottlerStorageRecord> {
+  async increment(key: string, ttl: number): Promise<RedisThrottlerStorageRecord> {
     const redisKey = `${this.keyPrefix}:${key}`;
     const [totalHits, timeToExpire] = (await this.redis.eval(
       INCREMENT_WITH_EXPIRY,
