@@ -12,19 +12,29 @@ import { PrismaModule } from './common/prisma/prisma.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { RedisThrottlerStorage } from './common/rate-limit/redis-throttler.storage';
 
+function boundedInt(value: string | undefined, fallback: number, min: number, max: number): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, Math.floor(parsed)));
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          ttl: Number(config.get<string>('RATE_LIMIT_TTL_MS') || 60_000),
-          limit: Number(config.get<string>('RATE_LIMIT_LIMIT') || 60),
-          storage: new RedisThrottlerStorage(config),
-        },
-      ],
+      useFactory: (config: ConfigService) => {
+        const legacyPeriodSeconds = config.get<string>('RATE_LIMIT_PERIOD');
+        const ttl = boundedInt(
+          config.get<string>('RATE_LIMIT_TTL_MS') || (legacyPeriodSeconds ? String(Number(legacyPeriodSeconds) * 1000) : undefined),
+          60_000,
+          1_000,
+          3_600_000,
+        );
+        const limit = boundedInt(config.get<string>('RATE_LIMIT_LIMIT') || config.get<string>('RATE_LIMIT_REQUESTS'), 60, 1, 10_000);
+        return [{ ttl, limit, storage: new RedisThrottlerStorage(config) }];
+      },
     }),
     PrismaModule,
     LoggerModule,
@@ -35,11 +45,6 @@ import { RedisThrottlerStorage } from './common/rate-limit/redis-throttler.stora
     AdminModule,
     HealthModule,
   ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
