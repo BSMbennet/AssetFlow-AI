@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { IsEthereumAddress, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { Body, Controller, ForbiddenException, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BlockchainService } from './blockchain.service';
 
 class MintDto {
@@ -21,13 +22,23 @@ export class BlockchainController {
     return this.blockchain.status();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('issuance/:requestId/prepare')
-  prepare(@Param('requestId') requestId: string, @Body() body: MintDto) {
+  prepare(@Req() req: any, @Param('requestId') requestId: string, @Body() body: MintDto) {
+    this.assertIssuer(req.user);
     return this.blockchain.prepareMint({ requestId, recipient: body.recipient, amount: body.amount });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('issuance/:requestId/execute')
-  execute(@Param('requestId') requestId: string, @Body() body: MintDto) {
+  execute(@Req() req: any, @Param('requestId') requestId: string, @Body() body: MintDto) {
+    this.assertIssuer(req.user);
     return this.blockchain.executeMint({ requestId, recipient: body.recipient, amount: body.amount });
+  }
+
+  private assertIssuer(user: any) {
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(user?.role)) {
+      throw new ForbiddenException('Blockchain issuance requires administrator privileges');
+    }
   }
 }
