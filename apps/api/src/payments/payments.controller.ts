@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UseGuards, Req, Headers, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Headers, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
+import { CryptoPaymentDto, StripeCheckoutDto } from './dto/payment.dto';
 
 @Controller('payments')
 export class PaymentsController {
@@ -8,33 +9,22 @@ export class PaymentsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('checkout/stripe')
-  async createStripeSession(@Req() req: any, @Body() body: { amount: number; currency: string }) {
-    if (!body.amount || body.amount <= 0) {
-      throw new BadRequestException('Invalid transaction total amount.');
-    }
-    return this.paymentsService.initiateStripePayment(req.user.id, body.amount, body.currency || 'USD');
+  async createStripeSession(@Req() req: any, @Body() body: StripeCheckoutDto) {
+    return this.paymentsService.initiateStripePayment(req.user.id, body.amount, body.currency);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('checkout/crypto')
-  async recordCryptoPayment(
-    @Req() req: any,
-    @Body() body: { amount: number; currency: string; txHash: string; network: string; method: 'USDC' | 'USDT' | 'CRYPTO' }
-  ) {
+  async recordCryptoPayment(@Req() req: any, @Body() body: CryptoPaymentDto) {
     return this.paymentsService.initiateBlockchainPayment(
-      req.user.id,
-      body.amount,
-      body.currency,
-      body.txHash,
-      body.network,
-      body.method
+      req.user.id, body.amount, body.currency, body.txHash, body.network, body.method,
     );
   }
 
   @Post('webhook/stripe')
   @HttpCode(HttpStatus.OK)
   async handleStripeWebhook(@Headers('stripe-signature') signature: string, @Req() req: any) {
-    if (!signature) throw new BadRequestException('Missing validation parameter signature.');
+    if (!signature) return { received: false };
     return this.paymentsService.processWebhook(req.rawBody, signature);
   }
 }
