@@ -2,7 +2,9 @@
   "name": "@assetflow/contracts",
   "private": true,
   "scripts": {
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "deploy:polygon": "hardhat run scripts/deploy-rwa.ts --network polygon",
+    "deploy:ethereum": "hardhat run scripts/deploy-rwa.ts --network ethereum"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
