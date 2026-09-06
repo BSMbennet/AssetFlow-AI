@@ -16,12 +16,11 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
     PrismaModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRES_IN') || '7d',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret || secret.length < 32) throw new Error('JWT_SECRET must be configured with at least 32 characters');
+        return { secret, signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN') || '15m' } };
+      },
       inject: [ConfigService],
     }),
   ],
