@@ -4,8 +4,10 @@ import {
   MinLength,
   MaxLength,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { OrganizationType } from '@assetflow/shared-types';
 
 export class RegisterDto {
   @ApiProperty({ example: 'john@example.com' })
@@ -42,11 +44,10 @@ export class RegisterDto {
   @MaxLength(100)
   companyName?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ enum: OrganizationType, required: false })
   @IsOptional()
-  @IsString()
-  @MaxLength(64)
-  organizationType?: string;
+  @IsEnum(OrganizationType)
+  organizationType?: OrganizationType;
 
   @ApiProperty({ required: false })
   @IsOptional()
