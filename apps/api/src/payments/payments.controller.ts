@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UseGuards, Req, Headers, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 
 @Controller('payments')
 export class PaymentsController {
