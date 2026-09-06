@@ -25,6 +25,10 @@ const replacements = [
     '  investmentMemos  InvestmentMemo[]',
     '  investmentMemos  InvestmentMemo[]\n  positions         Position[]',
   ],
+  [
+    '  deletedAt          DateTime?\n\n  // Relations',
+    '  deletedAt          DateTime?\n  stripeCustomerId    String?\n\n  // Relations',
+  ],
 ];
 
 for (const [from, to] of replacements) {
@@ -37,4 +41,4 @@ schema = schema
   .replace('seller           User     @relation(fields: [sellerId], references: [id])', 'seller           User     @relation("TradeSeller", fields: [sellerId], references: [id])');
 
 fs.writeFileSync(schemaPath, schema);
-console.log('Prepared Prisma schema relations for Render build.');
+console.log('Prepared Prisma schema relations and payment fields for Render build.');
