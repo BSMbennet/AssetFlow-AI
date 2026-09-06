@@ -1,23 +1,28 @@
-import { Injectable, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerStorage, ThrottlerStorageRecord } from '@nestjs/throttler';
 import Redis from 'ioredis';
 
-/**
- * Distributed throttler storage for multi-instance deployments.
- * Uses Redis INCR + PEXPIRE so all API instances share one counter.
- */
+const INCREMENT_WITH_EXPIRY = `
+  local count = redis.call('INCR', KEYS[1])
+  if count == 1 then
+    redis.call('PEXPIRE', KEYS[1], ARGV[1])
+  end
+  local ttl = redis.call('PTTL', KEYS[1])
+  return { count, ttl }
+`;
+
 @Injectable()
-export class RedisThrottlerStorage
-  implements ThrottlerStorage, OnApplicationShutdown
-{
+export class RedisThrottlerStorage implements ThrottlerStorage {
   private readonly redis: Redis;
   private readonly keyPrefix: string;
 
   constructor(config: ConfigService) {
     const redisUrl = config.get<string>('REDIS_URL');
+    if (!redisUrl && config.get<string>('NODE_ENV') === 'production') {
+      throw new Error('REDIS_URL is required in production for distributed throttling');
+    }
     this.keyPrefix = config.get<string>('REDIS_THROTTLE_PREFIX') || 'assetflow:throttle';
-
     this.redis = new Redis(redisUrl || 'redis://127.0.0.1:6379', {
       maxRetriesPerRequest: 1,
       enableReadyCheck: true,
@@ -28,20 +33,16 @@ export class RedisThrottlerStorage
 
   async increment(key: string, ttl: number): Promise<ThrottlerStorageRecord> {
     const redisKey = `${this.keyPrefix}:${key}`;
-    const count = await this.redis.incr(redisKey);
+    const [totalHits, timeToExpire] = (await this.redis.eval(
+      INCREMENT_WITH_EXPIRY,
+      1,
+      redisKey,
+      Math.max(1, Math.floor(ttl)),
+    )) as [number, number];
 
-    if (count === 1) {
-      await this.redis.pexpire(redisKey, ttl);
-    }
-
-    const ttlMs = await this.redis.pttl(redisKey);
     return {
-      totalHits: count,
-      timeToExpire: Math.max(ttlMs, 0),
+      totalHits: Number(totalHits),
+      timeToExpire: Math.max(Number(timeToExpire), 0),
     };
-  }
-
-  async onApplicationShutdown(): Promise<void> {
-    await this.redis.quit();
   }
 }
