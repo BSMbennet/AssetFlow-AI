@@ -21,6 +21,14 @@ async function bootstrap() {
     throw new Error('CORS_ORIGIN must be configured in production');
   }
 
+  // Render terminates TLS and forwards requests through a trusted proxy. Express must
+  // trust exactly the configured number of proxy hops so throttling keys on real clients.
+  const proxyHops = Number(configService.get<string>('TRUST_PROXY_HOPS') || (isProduction ? 1 : 0));
+  if (!Number.isInteger(proxyHops) || proxyHops < 0 || proxyHops > 3) {
+    throw new Error('TRUST_PROXY_HOPS must be an integer from 0 to 3');
+  }
+  app.getHttpAdapter().getInstance().set('trust proxy', proxyHops);
+
   app.use(helmet());
   app.use(cors({
     origin: configuredOrigins.length ? configuredOrigins : true,
