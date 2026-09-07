@@ -1,11 +1,13 @@
 services:
-  # 1. Primary REST API Engine
   - type: web
     name: assetflow-api
-    env: node
-    plan: starter
-    buildCommand: npm install && npm run build --filter=api
-    startCommand: npm run start:prod --filter=api
+    runtime: node
+    plan: free
+    region: virginia
+    buildCommand: npm install && npm run build --workspace=@assetflow/api
+    startCommand: npm run start --workspace=@assetflow/api
+    healthCheckPath: /health
+    autoDeployTrigger: commit
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,14 +18,15 @@ services:
       - key: REDIS_URL
         fromService:
           name: assetflow-cache
+          type: keyvalue
           property: connectionString
 
-  # 2. BullMQ Worker Node
   - type: worker
     name: assetflow-worker
-    env: node
-    plan: starter
-    buildCommand: npm install && npm run build --filter=api
+    runtime: node
+    plan: free
+    region: virginia
+    buildCommand: npm install && npm run build --workspace=@assetflow/api
     startCommand: node apps/api/dist/worker.js
     envVars:
       - key: DATABASE_URL
@@ -31,20 +34,22 @@ services:
           name: assetflow-db
           property: connectionString
 
-  # 3. Python AI microservice
   - type: web
     name: assetflow-ai-service
-    env: python
-    plan: starter
+    runtime: python
+    plan: free
+    region: virginia
     buildCommand: pip install -r apps/ai-service/requirements.txt
     startCommand: uvicorn apps.ai-service.main:app --host 0.0.0.0 --port 10000
 
+defaults:
+  region: virginia
+
 databases:
   - name: assetflow-db
-    plan: starter
-    postgresVersion: 16
+    plan: free
+    postgresMajorVersion: 16
 
-interfaces:
   - name: assetflow-cache
-    type: redis
-    plan: starter
+    plan: free
+    # Render Key Value resources belong in services; this entry is intentionally omitted.
