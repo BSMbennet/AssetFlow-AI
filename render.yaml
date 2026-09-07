@@ -21,6 +21,14 @@ services:
           type: keyvalue
           property: connectionString
 
+  - type: keyvalue
+    name: assetflow-cache
+    plan: free
+    region: virginia
+    maxmemoryPolicy: allkeys-lru
+    persistenceMode: off
+    ipAllowList: []
+
   - type: worker
     name: assetflow-worker
     runtime: node
@@ -49,7 +57,3 @@ databases:
   - name: assetflow-db
     plan: free
     postgresMajorVersion: 16
-
-  - name: assetflow-cache
-    plan: free
-    # Render Key Value resources belong in services; this entry is intentionally omitted.
