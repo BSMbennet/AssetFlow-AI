@@ -8,6 +8,7 @@ import { BlockchainModule } from './modules/blockchain/blockchain.module';
 import { HealthModule } from './modules/health/health.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
+import { SettlementModule } from './modules/settlement/settlement.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { RedisThrottlerStorage } from './common/rate-limit/redis-throttler.storage';
@@ -44,6 +45,7 @@ function boundedInt(value: string | undefined, fallback: number, min: number, ma
     BlockchainModule,
     AdminModule,
     HealthModule,
+    SettlementModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
