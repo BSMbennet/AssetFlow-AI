@@ -4,38 +4,44 @@
 
 @layer base {
   :root {
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
-    --card: 222 35% 7%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 35% 7%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 188 92% 55%;
-    --primary-foreground: 222 47% 4%;
-    --secondary: 223 25% 12%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 223 20% 12%;
-    --muted-foreground: 215 16% 62%;
-    --accent: 38 92% 60%;
-    --accent-foreground: 222 47% 4%;
-    --destructive: 0 72% 58%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 16%;
-    --input: 220 20% 16%;
-    --ring: 188 92% 55%;
-    --radius: 0.9rem;
+    --background: 222 38% 5%;
+    --foreground: 210 30% 96%;
+    --card: 220 32% 8%;
+    --card-foreground: 210 30% 96%;
+    --popover: 220 32% 8%;
+    --popover-foreground: 210 30% 96%;
+    --primary: 188 82% 52%;
+    --primary-foreground: 222 38% 5%;
+    --secondary: 220 24% 13%;
+    --secondary-foreground: 210 30% 96%;
+    --muted: 220 22% 12%;
+    --muted-foreground: 215 14% 60%;
+    --accent: 40 82% 58%;
+    --accent-foreground: 222 38% 5%;
+    --destructive: 0 68% 58%;
+    --destructive-foreground: 210 30% 96%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 188 82% 52%;
+    --radius: 0.85rem;
   }
 
   * { @apply border-border; }
   html, body { min-height: 100%; }
+  html { scroll-behavior: smooth; }
   body {
-    @apply bg-background text-foreground;
-    background-color: #07080b;
+    @apply bg-background text-foreground antialiased;
+    background-color: #06090e;
     background-image:
-      radial-gradient(circle at 20% -10%, rgba(255,255,255,.035), transparent 40%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
-    background-repeat: no-repeat, repeat;
+      radial-gradient(circle at 12% -12%, rgba(46, 196, 220, .075), transparent 30%),
+      radial-gradient(circle at 92% 8%, rgba(216, 169, 72, .055), transparent 28%),
+      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: auto, auto, 72px 72px, 72px 72px;
   }
+
+  ::selection { background: rgba(34, 211, 238, .22); color: #fff; }
+  :focus-visible { outline: 2px solid rgba(34, 211, 238, .72); outline-offset: 2px; }
 }
 
 @layer utilities {
@@ -43,84 +49,155 @@
 }
 
 @layer components {
-  .assetflow-shell { background: #05070b; color: #f5f7fb; }
+  .assetflow-shell {
+    background:
+      radial-gradient(circle at 50% -20%, rgba(255,255,255,.025), transparent 34%),
+      #06090e;
+    color: #f3f6fa;
+  }
+
   .assetflow-sidebar {
-    background: rgba(8, 11, 17, 0.88);
-    border-color: rgba(255,255,255,.08);
-    backdrop-filter: blur(18px);
+    background: rgba(7, 11, 17, .94);
+    border-color: rgba(255,255,255,.075);
+    box-shadow: 20px 0 70px rgba(0,0,0,.18);
+    backdrop-filter: blur(22px) saturate(125%);
   }
+
   .assetflow-brand {
-    color: #f3ead9;
-    letter-spacing: -.01em;
+    color: #f5f7fa;
+    letter-spacing: -.025em;
   }
+
   .assetflow-nav-active {
-    background: rgba(34,211,238,.09);
-    border-left-color: #22d3ee;
-    color: white;
+    position: relative;
+    background: linear-gradient(90deg, rgba(34,211,238,.105), rgba(34,211,238,.035));
+    border-left-color: #38d7e8;
+    color: #f7fbff;
+    box-shadow: inset 1px 0 0 rgba(255,255,255,.04), 0 8px 22px rgba(0,0,0,.12);
   }
+
+  .assetflow-nav-active::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: #42d9e8;
+    box-shadow: 0 0 12px rgba(66,217,232,.7);
+  }
+
   .assetflow-topbar {
-    background: rgba(5, 7, 11, .78);
-    border-color: rgba(255,255,255,.08);
-    backdrop-filter: blur(18px);
+    background: rgba(6, 9, 14, .84);
+    border-color: rgba(255,255,255,.075);
+    box-shadow: 0 12px 32px rgba(0,0,0,.12);
+    backdrop-filter: blur(22px) saturate(130%);
   }
+
   .assetflow-search {
-    background: rgba(255,255,255,.035);
-    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.032);
+    border: 1px solid rgba(255,255,255,.085);
     color: #f5f7fb;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
   }
-  .assetflow-search::placeholder { color: #737b8c; }
+
+  .assetflow-search:hover { border-color: rgba(255,255,255,.14); }
+  .assetflow-search:focus { border-color: rgba(34,211,238,.42); box-shadow: 0 0 0 3px rgba(34,211,238,.07); }
+  .assetflow-search::placeholder { color: #687283; }
+
   .assetflow-primary {
-    background: #f0b429;
-    color: #1a1102;
-    box-shadow: 0 10px 24px rgba(240,180,41,.16);
+    background: linear-gradient(135deg, #f0c15b, #d9a33c);
+    color: #191305;
+    border: 1px solid rgba(255,220,137,.25);
+    box-shadow: 0 8px 24px rgba(217,163,60,.14), inset 0 1px 0 rgba(255,255,255,.28);
   }
-  .assetflow-primary:hover { background: #f5c453; }
+
+  .assetflow-primary:hover {
+    background: linear-gradient(135deg, #f6cb6b, #e1ad47);
+    box-shadow: 0 10px 28px rgba(217,163,60,.2), inset 0 1px 0 rgba(255,255,255,.3);
+  }
+
   .assetflow-hero {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,.09);
+    border: 1px solid rgba(255,255,255,.095);
     background:
-      radial-gradient(circle at 80% 25%, rgba(34,211,238,.24), transparent 28%),
-      radial-gradient(circle at 55% 85%, rgba(245,158,11,.16), transparent 34%),
-      linear-gradient(135deg, #0b1018, #070a10 55%, #0b0713);
-    box-shadow: 0 24px 80px rgba(0,0,0,.28);
+      radial-gradient(circle at 82% 18%, rgba(43,193,215,.15), transparent 24%),
+      radial-gradient(circle at 72% 105%, rgba(214,165,67,.10), transparent 31%),
+      linear-gradient(135deg, #0d141d 0%, #090e15 56%, #0b0d14 100%);
+    box-shadow: 0 28px 90px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.035);
   }
+
+  .assetflow-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.025) 48%, transparent 62%);
+    pointer-events: none;
+  }
+
   .assetflow-orb {
     position: absolute;
-    width: 180px;
-    height: 180px;
-    right: 8%;
-    top: 18%;
+    width: 210px;
+    height: 210px;
+    right: 7%;
+    top: 12%;
     border-radius: 999px;
-    background: radial-gradient(circle at 35% 30%, #a5f3fc, #22d3ee 22%, #f59e0b 60%, transparent 72%);
-    opacity: .7;
-    box-shadow: 0 0 80px rgba(34,211,238,.25);
+    background: radial-gradient(circle at 35% 30%, rgba(174,242,249,.9), rgba(38,190,210,.55) 20%, rgba(197,147,51,.18) 57%, transparent 73%);
+    opacity: .62;
+    filter: blur(.2px);
+    box-shadow: 0 0 100px rgba(34,211,238,.12);
   }
+
   .assetflow-radar {
     position: absolute;
-    width: 340px;
-    height: 340px;
-    right: -30px;
-    top: -30px;
+    width: 390px;
+    height: 390px;
+    right: -70px;
+    top: -65px;
     border-radius: 999px;
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(34,211,238,.4) 30deg, transparent 90deg, transparent 360deg);
-    -webkit-mask-image: radial-gradient(circle, black 58%, transparent 76%);
-    mask-image: radial-gradient(circle, black 58%, transparent 76%);
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(34,211,238,.18) 34deg, transparent 86deg, transparent 360deg);
+    -webkit-mask-image: radial-gradient(circle, black 56%, transparent 76%);
+    mask-image: radial-gradient(circle, black 56%, transparent 76%);
+    opacity: .72;
   }
+
   .assetflow-live-dot {
     display: inline-block;
     width: 6px;
     height: 6px;
     border-radius: 999px;
-    background: #34d399;
+    background: #49d7a0;
+    box-shadow: 0 0 10px rgba(73,215,160,.55);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .animate-assetflow-spin, .animate-assetflow-pulse { animation: none; }
-  }
+
   .assetflow-chip {
-    border: 1px solid rgba(255,255,255,.09);
-    background: rgba(255,255,255,.045);
-    color: #aab2c3;
+    border: 1px solid rgba(255,255,255,.085);
+    background: rgba(255,255,255,.038);
+    color: #aeb7c6;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
   }
-  .assetflow-muted { color: #7f8797; }
+
+  .assetflow-muted { color: #818b9c; }
+
+  /* Give existing dashboard cards a restrained institutional finish without changing markup. */
+  .assetflow-shell .rounded-2xl.border,
+  .assetflow-shell .rounded-3xl.border {
+    border-color: rgba(255,255,255,.085);
+  }
+
+  .assetflow-shell table tbody tr { transition: background-color .18s ease, box-shadow .18s ease; }
+  .assetflow-shell table tbody tr:hover { background: rgba(255,255,255,.028); box-shadow: inset 3px 0 0 rgba(34,211,238,.35); }
+  .assetflow-shell button { -webkit-tap-highlight-color: transparent; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .animate-assetflow-spin, .animate-assetflow-pulse { animation: none; }
+    *, *::before, *::after { transition-duration: .01ms !important; }
+  }
 }
