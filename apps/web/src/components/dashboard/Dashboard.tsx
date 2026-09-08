@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LayoutDashboard, Building, Coins, Users, Shield, BarChart3, Settings, Bell, Search, Plus, Loader2, FileUp, Sparkles, LogOut, Menu, X, AlertTriangle, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, Building, Coins, Users, Shield, BarChart3, Settings, Bell, Search, Plus, Loader2, FileUp, Sparkles, LogOut, Menu, X, AlertTriangle, ArrowLeftRight, Landmark } from 'lucide-react';
 import { StatsCards } from './StatsCards';
 import { ActivityFeed } from './ActivityFeed';
 import { AssetChart } from './AssetChart';
@@ -12,6 +12,7 @@ import { Phase3Workspace } from '@/components/compliance/Phase3Workspace';
 import { PortfolioMonitoringWorkspace } from '@/components/monitoring/PortfolioMonitoringWorkspace';
 import { Phase5TokenizationWorkspace } from '@/components/tokenization/Phase5TokenizationWorkspace';
 import { Phase6TradingWorkspace } from '@/components/trading/Phase6TradingWorkspace';
+import { Phase7SettlementWorkspace } from '@/components/settlement/Phase7SettlementWorkspace';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 
@@ -23,6 +24,7 @@ const navigation = [
   { icon: Shield, label: 'Compliance', id: 'compliance', blurb: 'KYC and AML checks, audit trails, and filing status per asset.' },
   { icon: BarChart3, label: 'Portfolio Monitoring', id: 'monitoring', blurb: 'Yield curves, portfolio performance, and risk exposure at a glance.' },
   { icon: ArrowLeftRight, label: 'Trading & Liquidity', id: 'trading', blurb: 'Controlled liquidity workflows for institution-ready assets.' },
+  { icon: Landmark, label: 'Settlement', id: 'settlement', blurb: 'Stage, review and advance controlled settlement instructions.' },
   { icon: Settings, label: 'Settings', id: 'settings', blurb: 'Team access, notification preferences, and account details.' },
 ];
 
@@ -90,7 +92,7 @@ export function Dashboard() {
           </div>
         </header>
 
-        {activeTab === 'compliance' ? <Phase3Workspace /> : activeTab === 'monitoring' ? <PortfolioMonitoringWorkspace /> : activeTab === 'tokens' ? <Phase5TokenizationWorkspace /> : activeTab === 'trading' ? <Phase6TradingWorkspace /> : <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
+        {activeTab === 'compliance' ? <Phase3Workspace /> : activeTab === 'monitoring' ? <PortfolioMonitoringWorkspace /> : activeTab === 'tokens' ? <Phase5TokenizationWorkspace /> : activeTab === 'trading' ? <Phase6TradingWorkspace /> : activeTab === 'settlement' ? <Phase7SettlementWorkspace /> : <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
           {activeTab === 'overview' && <>
             <section className="assetflow-hero rounded-3xl p-6 md:p-8">
               <div className="assetflow-radar pointer-events-none" />
