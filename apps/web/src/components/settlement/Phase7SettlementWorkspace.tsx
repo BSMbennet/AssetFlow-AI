@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, Landmark, LockKeyhole, RefreshCw, Send, ShieldCheck, XCircle } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { useAssets } from '@/components/dashboard/AssetData';
@@ -102,6 +103,12 @@ export function Phase7SettlementWorkspace() {
 
   const currentIndex = selected ? statusOrder.indexOf(selected.status) : -1;
   const nextStatus = currentIndex >= 0 && currentIndex < statusOrder.length - 1 ? statusOrder[currentIndex + 1] : null;
+  const summaryCards: Array<[string, number, LucideIcon]> = [
+    ['Pending review', settlements.filter((s) => s.status === 'PENDING_REVIEW').length, Clock3],
+    ['Ready', settlements.filter((s) => s.status === 'READY').length, ShieldCheck],
+    ['In settlement', settlements.filter((s) => s.status === 'IN_SETTLEMENT').length, Send],
+    ['Settled', settlements.filter((s) => s.status === 'SETTLED').length, CheckCircle2],
+  ];
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6 p-4 md:p-8">
@@ -118,12 +125,7 @@ export function Phase7SettlementWorkspace() {
       </section>
 
       <div className="grid gap-4 md:grid-cols-4">
-        {[
-          ['Pending review', settlements.filter((s) => s.status === 'PENDING_REVIEW').length, Clock3],
-          ['Ready', settlements.filter((s) => s.status === 'READY').length, ShieldCheck],
-          ['In settlement', settlements.filter((s) => s.status === 'IN_SETTLEMENT').length, Send],
-          ['Settled', settlements.filter((s) => s.status === 'SETTLED').length, CheckCircle2],
-        ].map(([label, value, Icon]) => <div key={String(label)} className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><div className="flex items-center justify-between"><span className="text-sm text-slate-400">{label}</span><Icon className="h-4 w-4 text-cyan-300" /></div><div className="mt-3 text-2xl font-semibold text-white">{value}</div><div className="mt-1 text-xs text-slate-600">Live workspace instructions</div></div>)}
+        {summaryCards.map(([label, value, Icon]) => <div key={label} className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><div className="flex items-center justify-between"><span className="text-sm text-slate-400">{label}</span><Icon className="h-4 w-4 text-cyan-300" /></div><div className="mt-3 text-2xl font-semibold text-white">{value}</div><div className="mt-1 text-xs text-slate-600">Live workspace instructions</div></div>)}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.35fr_.65fr]">
