@@ -106,4 +106,42 @@
   @media (max-width:1023px) { .assetflow-sidebar{width:min(88vw,21rem);} }
   @media (max-width:640px) { .assetflow-command-orbit{right:-210px;top:-110px}.assetflow-orb{right:-90px;top:-50px}.assetflow-command,.assetflow-hero{border-radius:.75rem}.assetflow-kpi strong{font-size:1.05rem} }
   @media (prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important} }
+
+  /* Collapsed navigation rail: content-first browsing on every page. */
+  .assetflow-shell > .assetflow-sidebar {
+    position:fixed !important;
+    inset:0 auto 0 0 !important;
+    width:min(88vw,21rem) !important;
+    transform:translateX(-100%);
+    z-index:60 !important;
+    transition:transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s ease;
+  }
+  .assetflow-shell:has(.assetflow-sidebar.translate-x-0) > .assetflow-sidebar { transform:translateX(0); box-shadow:20px 0 90px rgba(0,0,0,.55); }
+  .assetflow-shell:has(.assetflow-sidebar.translate-x-0) > div.fixed.inset-0 { display:block !important; z-index:55; }
+  .assetflow-shell > main { width:100%; min-width:0; }
+  .assetflow-topbar { padding-left:2.75rem; }
+  .assetflow-topbar button[aria-label="Open menu"] {
+    display:grid !important;
+    position:fixed;
+    left:.55rem;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:70;
+    width:5px;
+    height:72px;
+    padding:0;
+    border:1px solid rgba(0,242,254,.38);
+    border-radius:999px;
+    background:rgba(0,242,254,.16);
+    box-shadow:0 0 14px rgba(0,242,254,.18);
+    color:transparent;
+  }
+  .assetflow-topbar button[aria-label="Open menu"] svg { display:none; }
+  .assetflow-topbar button[aria-label="Open menu"]::after { content:''; position:absolute; inset:16px 0; border-radius:999px; background:#00f2fe; box-shadow:0 0 10px rgba(0,242,254,.8); opacity:.72; }
+  .assetflow-topbar button[aria-label="Open menu"]:hover { width:7px; background:rgba(0,242,254,.24); }
+  .assetflow-shell:has(.assetflow-sidebar.translate-x-0) .assetflow-topbar button[aria-label="Open menu"] { opacity:.25; }
+  @media (max-width:640px) {
+    .assetflow-topbar { padding-left:2.5rem; }
+    .assetflow-topbar button[aria-label="Open menu"] { left:.35rem; height:56px; }
+  }
 }
