@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -30,12 +32,9 @@
   html { scroll-behavior: smooth; }
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
     background-color: #06090e;
-    background-image:
-      linear-gradient(rgba(0,242,254,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,242,254,.035) 1px, transparent 1px),
-      radial-gradient(circle at 72% -10%, rgba(0,242,254,.09), transparent 28%),
-      radial-gradient(circle at 5% 30%, rgba(30,58,138,.08), transparent 30%);
+    background-image: linear-gradient(rgba(0,242,254,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(0,242,254,.035) 1px, transparent 1px), radial-gradient(circle at 72% -10%, rgba(0,242,254,.09), transparent 28%), radial-gradient(circle at 5% 30%, rgba(30,58,138,.08), transparent 30%);
     background-size: 48px 48px, 48px 48px, auto, auto;
   }
   ::selection { background: rgba(0,242,254,.24); color: #fff; }
@@ -51,88 +50,25 @@
 
 @layer components {
   .assetflow-shell { min-height:100%; background:#06090e; color:#dde2f2; }
-  .assetflow-sidebar {
-    background:rgba(7,13,22,.96);
-    border-color:rgba(0,242,254,.10);
-    box-shadow:20px 0 70px rgba(0,0,0,.34);
-    backdrop-filter:blur(20px);
-  }
+  .assetflow-sidebar { background:rgba(7,13,22,.96); border-color:rgba(0,242,254,.10); box-shadow:20px 0 70px rgba(0,0,0,.34); backdrop-filter:blur(20px); }
   .assetflow-brand { color:#eefaff; letter-spacing:-.025em; }
-  .assetflow-mark {
-    background:linear-gradient(135deg,#00f2fe 0%,#4facfe 100%);
-    box-shadow:0 0 28px rgba(0,242,254,.28);
-  }
-  .assetflow-nav-active {
-    position:relative;
-    background:linear-gradient(90deg,rgba(0,242,254,.18),rgba(0,242,254,.035));
-    border-left-color:#00f2fe;
-    color:#effcff;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 18px rgba(0,242,254,.06);
-  }
-  .assetflow-nav-active::after {
-    content:''; position:absolute; right:10px; width:5px; height:5px; border-radius:50%;
-    background:#00f2fe; box-shadow:0 0 12px rgba(0,242,254,.9);
-  }
-  .assetflow-topbar {
-    background:rgba(6,12,20,.86);
-    border-color:rgba(0,242,254,.09);
-    backdrop-filter:blur(22px) saturate(135%);
-    box-shadow:0 10px 36px rgba(0,0,0,.22);
-  }
-  .assetflow-search {
-    background:#070d16;
-    border:1px solid rgba(255,255,255,.10);
-    color:#eefaff;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
-  }
+  .assetflow-mark { background:linear-gradient(135deg,#00f2fe 0%,#4facfe 100%); box-shadow:0 0 28px rgba(0,242,254,.28); }
+  .assetflow-nav-active { position:relative; background:linear-gradient(90deg,rgba(0,242,254,.18),rgba(0,242,254,.035)); border-left-color:#00f2fe; color:#effcff; box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 18px rgba(0,242,254,.06); }
+  .assetflow-nav-active::after { content:''; position:absolute; right:10px; width:5px; height:5px; border-radius:50%; background:#00f2fe; box-shadow:0 0 12px rgba(0,242,254,.9); }
+  .assetflow-topbar { background:rgba(6,12,20,.86); border-color:rgba(0,242,254,.09); backdrop-filter:blur(22px) saturate(135%); box-shadow:0 10px 36px rgba(0,0,0,.22); }
+  .assetflow-search { background:#070d16; border:1px solid rgba(255,255,255,.10); color:#eefaff; box-shadow:inset 0 1px 0 rgba(255,255,255,.02); }
   .assetflow-search:hover { border-color:rgba(0,242,254,.20); }
   .assetflow-search:focus { border-color:#00f2fe; box-shadow:0 0 10px rgba(0,242,254,.16); }
   .assetflow-search::placeholder { color:#718093; }
-  .assetflow-primary {
-    background:linear-gradient(135deg,#00f2fe 0%,#4facfe 100%);
-    color:#06090e;
-    border:1px solid rgba(190,252,255,.30);
-    box-shadow:0 0 24px -4px rgba(0,242,254,.25),inset 0 1px 0 rgba(255,255,255,.28);
-  }
+  .assetflow-primary { background:linear-gradient(135deg,#00f2fe 0%,#4facfe 100%); color:#06090e; border:1px solid rgba(190,252,255,.30); box-shadow:0 0 24px -4px rgba(0,242,254,.25),inset 0 1px 0 rgba(255,255,255,.28); }
   .assetflow-primary:hover { filter:brightness(1.05); box-shadow:0 0 30px -4px rgba(0,242,254,.38),inset 0 1px 0 rgba(255,255,255,.35); }
-  .assetflow-secondary {
-    background:rgba(12,18,29,.90);
-    color:#00f2fe;
-    border:1px solid rgba(0,242,254,.30);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
-  }
+  .assetflow-secondary { background:rgba(12,18,29,.90); color:#00f2fe; border:1px solid rgba(0,242,254,.30); box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
   .assetflow-secondary:hover { background:rgba(0,242,254,.08); border-color:rgba(0,242,254,.48); }
-  .assetflow-hero,
-  .assetflow-command {
-    position:relative; overflow:hidden;
-    border:1px solid rgba(0,242,254,.16);
-    background:linear-gradient(135deg,rgba(18,28,45,.92),rgba(8,14,25,.92));
-    box-shadow:0 28px 90px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.045);
-    backdrop-filter:blur(18px);
-  }
-  .assetflow-hero::before,
-  .assetflow-command::before {
-    content:''; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(115deg,transparent 0%,rgba(0,242,254,.035) 48%,transparent 68%);
-  }
-  .assetflow-orb {
-    position:absolute; width:260px; height:260px; right:5%; top:-30px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%,rgba(156,240,255,.72),rgba(0,242,254,.30) 20%,rgba(79,172,254,.10) 50%,transparent 72%);
-    box-shadow:0 0 100px rgba(0,242,254,.10);
-  }
-  .assetflow-radar {
-    position:absolute; width:440px; height:440px; right:-100px; top:-120px; border-radius:50%;
-    border:1px solid rgba(0,242,254,.10);
-    background:conic-gradient(from 0deg,transparent 0deg,rgba(0,242,254,.18) 35deg,transparent 80deg,transparent 360deg);
-    -webkit-mask-image:radial-gradient(circle,black 54%,transparent 76%);
-    mask-image:radial-gradient(circle,black 54%,transparent 76%);
-  }
-  .assetflow-command-grid {
-    position:absolute; inset:0; pointer-events:none;
-    background-image:linear-gradient(rgba(0,242,254,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(0,242,254,.045) 1px,transparent 1px);
-    background-size:40px 40px;
-    mask-image:linear-gradient(to bottom right,black,transparent 74%);
-  }
+  .assetflow-hero,.assetflow-command { position:relative; overflow:hidden; border:1px solid rgba(0,242,254,.16); background:linear-gradient(135deg,rgba(18,28,45,.92),rgba(8,14,25,.92)); box-shadow:0 28px 90px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.045); backdrop-filter:blur(18px); }
+  .assetflow-hero::before,.assetflow-command::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,transparent 0%,rgba(0,242,254,.035) 48%,transparent 68%); }
+  .assetflow-orb { position:absolute; width:260px; height:260px; right:5%; top:-30px; border-radius:50%; background:radial-gradient(circle at 35% 30%,rgba(156,240,255,.72),rgba(0,242,254,.30) 20%,rgba(79,172,254,.10) 50%,transparent 72%); box-shadow:0 0 100px rgba(0,242,254,.10); }
+  .assetflow-radar { position:absolute; width:440px; height:440px; right:-100px; top:-120px; border-radius:50%; border:1px solid rgba(0,242,254,.10); background:conic-gradient(from 0deg,transparent 0deg,rgba(0,242,254,.18) 35deg,transparent 80deg,transparent 360deg); -webkit-mask-image:radial-gradient(circle,black 54%,transparent 76%); mask-image:radial-gradient(circle,black 54%,transparent 76%); }
+  .assetflow-command-grid { position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(0,242,254,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(0,242,254,.045) 1px,transparent 1px); background-size:40px 40px; mask-image:linear-gradient(to bottom right,black,transparent 74%); }
   .assetflow-command-orbit { position:absolute; right:-80px; top:-150px; width:460px; height:460px; border:1px solid rgba(0,242,254,.10); border-radius:50%; box-shadow:0 0 100px rgba(0,242,254,.05); }
   .assetflow-gradient-text { background:linear-gradient(90deg,#fff,#00f2fe 55%,#9cf0ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .assetflow-eyebrow { display:inline-flex; align-items:center; gap:.45rem; color:#8aa0b7; font:600 10px/12px 'JetBrains Mono',monospace; letter-spacing:.10em; text-transform:uppercase; }
@@ -141,19 +77,9 @@
   .assetflow-chip { display:inline-flex; align-items:center; gap:.4rem; border:1px solid rgba(0,242,254,.20); background:rgba(0,242,254,.06); color:#b9cacb; border-radius:999px; padding:.42rem .7rem; font:500 10px/14px 'Geist',ui-sans-serif,sans-serif; }
   .assetflow-live-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:#00f5a0; box-shadow:0 0 10px rgba(0,245,160,.75); }
   .assetflow-muted { color:#8fa0b4; }
-  .assetflow-card,
-  .assetflow-panel {
-    border:1px solid rgba(0,242,254,.12);
-    background:rgba(12,18,29,.76);
-    box-shadow:0 20px 60px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.025);
-    backdrop-filter:blur(18px);
-  }
-  .assetflow-card::before,
-  .assetflow-panel::before { content:''; display:block; height:1px; margin:-1px -1px 0; background:linear-gradient(90deg,rgba(0,242,254,.34),transparent 60%); opacity:.8; }
-  .assetflow-kpi {
-    min-width:0; border:1px solid rgba(0,242,254,.11); border-radius:.5rem;
-    background:rgba(12,18,29,.78); padding:1rem; box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
-  }
+  .assetflow-card,.assetflow-panel { border:1px solid rgba(0,242,254,.12); background:rgba(12,18,29,.76); box-shadow:0 20px 60px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.025); backdrop-filter:blur(18px); }
+  .assetflow-card::before,.assetflow-panel::before { content:''; display:block; height:1px; margin:-1px -1px 0; background:linear-gradient(90deg,rgba(0,242,254,.34),transparent 60%); opacity:.8; }
+  .assetflow-kpi { min-width:0; border:1px solid rgba(0,242,254,.11); border-radius:.5rem; background:rgba(12,18,29,.78); padding:1rem; box-shadow:inset 0 1px 0 rgba(255,255,255,.025); }
   .assetflow-kpi p { color:#7e92a7; font:600 9px/12px 'JetBrains Mono',monospace; letter-spacing:.10em; text-transform:uppercase; }
   .assetflow-kpi strong { display:block; margin-top:.6rem; color:#eefaff; font:500 1.45rem/1.1 'JetBrains Mono',monospace; letter-spacing:-.03em; }
   .assetflow-kpi span { display:block; margin-top:.45rem; color:#00f2fe; font:500 9px/12px 'JetBrains Mono',monospace; }
