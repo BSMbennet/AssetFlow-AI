@@ -1,0 +1,56 @@
+/* Mobile institutional command-center skin inspired by the supplied AI Firewall reference. */
+@media (max-width: 640px) {
+  html, body { background:#070e14; }
+  body { background-image:linear-gradient(rgba(0,242,254,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,242,254,.018) 1px,transparent 1px),radial-gradient(circle at 80% -10%,rgba(0,242,254,.10),transparent 32%); background-size:48px 48px,48px 48px,auto; }
+  .assetflow-shell { min-height:100dvh !important; height:100dvh !important; background:#070e14 !important; }
+  .assetflow-shell > main { overflow:auto !important; padding-bottom:76px !important; }
+  .assetflow-shell::before { content:''; position:fixed; left:0; top:44%; width:3px; height:72px; z-index:75; background:#00f2fe; box-shadow:0 0 16px rgba(0,242,254,.75); border-radius:0 4px 4px 0; pointer-events:none; }
+  .assetflow-topbar { height:140px !important; padding:0 !important; position:sticky !important; top:0 !important; z-index:30 !important; background:#09121b !important; border-color:rgba(122,153,174,.18) !important; box-shadow:none !important; }
+  .assetflow-topbar > div { height:100% !important; padding:0 18px 0 28px !important; align-items:center !important; }
+  .assetflow-topbar .relative { display:none !important; }
+  .assetflow-topbar .min-w-0.sm\:hidden { display:block !important; position:absolute; left:116px; top:46px; }
+  .assetflow-topbar .min-w-0.sm\:hidden p:first-child { font-family:'Space Grotesk',sans-serif !important; font-size:22px !important; line-height:26px !important; color:#f1f7fb !important; font-weight:700 !important; }
+  .assetflow-topbar .min-w-0.sm\:hidden p:last-child { margin-top:5px !important; font-family:'JetBrains Mono',monospace !important; font-size:9px !important; letter-spacing:.24em !important; color:#62788b !important; }
+  .assetflow-topbar button[aria-label="Open menu"] { display:grid !important; position:fixed !important; left:0 !important; top:calc(44% + 2px) !important; width:8px !important; height:72px !important; padding:0 !important; z-index:76 !important; border-radius:0 5px 5px 0 !important; background:#00f2fe !important; box-shadow:0 0 18px rgba(0,242,254,.65) !important; }
+  .assetflow-topbar button[aria-label="Open menu"] svg { display:none !important; }
+  .assetflow-topbar > div::before { content:'◈'; position:absolute; left:28px; top:45px; width:68px; height:68px; display:grid; place-items:center; border:1px solid rgba(0,242,254,.55); border-radius:20px; color:#00f2fe; font-size:35px; line-height:1; box-shadow:0 0 24px rgba(0,242,254,.12), inset 0 0 18px rgba(0,242,254,.06); }
+  .assetflow-topbar > div::after { content:'LIVE'; position:absolute; right:92px; top:62px; color:#75f7cb; font:500 13px 'JetBrains Mono',monospace; letter-spacing:.18em; }
+  .assetflow-topbar .flex.shrink-0 { position:absolute; right:16px; top:55px; gap:0 !important; }
+  .assetflow-topbar .flex.shrink-0 > div { display:none !important; }
+  .assetflow-topbar .flex.shrink-0 button[aria-label="Notifications"] { display:none !important; }
+  .assetflow-topbar .flex.shrink-0 button:not([aria-label="Notifications"]) { width:46px !important; height:46px !important; padding:0 !important; border-radius:50% !important; background:linear-gradient(135deg,#00d8ef,#24a9dd) !important; color:#071018 !important; font-size:0 !important; box-shadow:0 0 26px rgba(0,242,254,.22) !important; }
+  .assetflow-topbar .flex.shrink-0 button:not([aria-label="Notifications"])::after { content:'A'; font:700 20px 'Space Grotesk',sans-serif; }
+  .assetflow-shell > .assetflow-sidebar { width:61vw !important; max-width:440px !important; min-width:320px !important; background:#09121b !important; border-right:1px solid rgba(90,126,148,.22) !important; box-shadow:24px 0 70px rgba(0,0,0,.60) !important; }
+  .assetflow-sidebar > div:first-child { height:140px !important; padding:36px 22px !important; background:#0b141d !important; }
+  .assetflow-sidebar > div:first-child .assetflow-mark { width:72px !important; height:72px !important; border-radius:20px !important; }
+  .assetflow-sidebar > div:first-child .assetflow-brand { font-size:24px !important; }
+  .assetflow-sidebar nav { padding:28px 20px !important; }
+  .assetflow-sidebar nav > p { display:none !important; }
+  .assetflow-sidebar nav button { min-height:72px !important; border-radius:17px !important; padding:0 22px !important; font:500 15px/20px 'JetBrains Mono',monospace !important; letter-spacing:.08em !important; text-transform:uppercase !important; }
+  .assetflow-sidebar nav button svg { width:24px !important; height:24px !important; margin-right:20px !important; }
+  .assetflow-sidebar .assetflow-nav-active { background:linear-gradient(90deg,rgba(0,242,254,.14),rgba(0,242,254,.03)) !important; box-shadow:inset 0 0 22px rgba(0,242,254,.035) !important; }
+  .assetflow-sidebar > div:nth-child(2) { display:none !important; }
+  .assetflow-sidebar > div:last-child { padding:18px !important; }
+  .assetflow-sidebar > div:last-child > div { display:none !important; }
+  .assetflow-shell main > div.mx-auto { padding:30px 28px 36px !important; max-width:none !important; }
+  .assetflow-command { border-radius:0 !important; border-left:0 !important; border-right:0 !important; background:transparent !important; box-shadow:none !important; padding:0 !important; margin-bottom:28px !important; }
+  .assetflow-command-grid, .assetflow-command-orbit { opacity:.45 !important; }
+  .assetflow-command .relative.z-10 { display:block !important; }
+  .assetflow-command .relative.z-10 > div:first-child { padding:0 !important; }
+  .assetflow-eyebrow { font-size:10px !important; letter-spacing:.16em !important; color:#00d9e8 !important; }
+  .assetflow-command h2 { margin-top:12px !important; font-size:39px !important; line-height:1.08 !important; letter-spacing:-.055em !important; }
+  .assetflow-command .relative.z-10 > div:first-child > p { font-size:16px !important; line-height:1.55 !important; color:#7e94a7 !important; margin-top:16px !important; }
+  .assetflow-command .assetflow-chip { display:none !important; }
+  .assetflow-network-card { margin-top:26px !important; min-width:0 !important; width:100% !important; border-radius:16px !important; }
+  .assetflow-shell main > div.mx-auto > .grid.grid-cols-2 { grid-template-columns:1fr !important; gap:0 !important; margin-top:8px !important; }
+  .assetflow-kpi { min-height:190px !important; border-radius:24px !important; padding:40px 40px !important; margin-bottom:8px !important; background:linear-gradient(145deg,#101a27,#0c151f) !important; border-color:rgba(95,129,151,.22) !important; box-shadow:0 16px 36px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.025) !important; }
+  .assetflow-kpi p { font-size:10px !important; letter-spacing:.18em !important; }
+  .assetflow-kpi strong { font-size:45px !important; margin-top:30px !important; letter-spacing:-.06em !important; }
+  .assetflow-kpi span { font-size:11px !important; margin-top:12px !important; color:#7e94a7 !important; }
+  .assetflow-shell main > div.mx-auto > .assetflow-panel, .assetflow-shell main > div.mx-auto > .grid:not(.grid-cols-2), .assetflow-shell main > div.mx-auto > section:not(.assetflow-command) { border-radius:22px !important; }
+  .assetflow-mobile-nav { height:76px !important; padding:7px 8px 9px !important; background:#09121b !important; border-top:1px solid rgba(105,137,157,.20) !important; }
+  .assetflow-mobile-nav button { gap:5px !important; border-radius:14px !important; font:500 8px/10px 'JetBrains Mono',monospace !important; letter-spacing:.10em !important; text-transform:uppercase !important; }
+  .assetflow-mobile-nav button svg { width:25px !important; height:25px !important; }
+  .assetflow-mobile-nav button.text-cyan-300 { background:rgba(0,242,254,.05) !important; color:#00f2fe !important; }
+  .assetflow-shell [class*="max-w-lg"] { max-height:calc(100dvh - 32px); overflow:auto; }
+}
