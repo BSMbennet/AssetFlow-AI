@@ -75,7 +75,15 @@ create table if not exists public.access_events (
 create index if not exists access_events_org_idx
   on public.access_events(organization_id, created_at desc);
 
-create or replace function public.current_access_org()
+create schema if not exists private;
+
+revoke all on schema private from public;
+grant usage on schema private to authenticated;
+
+drop function if exists private.current_access_org();
+drop function if exists private.current_access_role();
+
+create or replace function private.current_access_org()
 returns uuid
 language sql
 stable
@@ -85,7 +93,7 @@ as $$
   select organization_id from public.profiles where id = auth.uid()
 $$;
 
-create or replace function public.current_access_role()
+create or replace function private.current_access_role()
 returns text
 language sql
 stable
@@ -94,7 +102,7 @@ set search_path = public
 as $$
   select role
   from public.organization_members
-  where organization_id = public.current_access_org()
+  where organization_id = private.current_access_org()
     and user_id = auth.uid()
     and status = 'ACTIVE'
   limit 1
@@ -133,27 +141,27 @@ drop policy if exists organization_members_update on public.organization_members
 drop policy if exists organization_members_delete on public.organization_members;
 
 create policy organization_members_select on public.organization_members
-for select using (organization_id = public.current_access_org());
+for select using (organization_id = private.current_access_org());
 
 create policy organization_members_insert on public.organization_members
 for insert with check (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy organization_members_update on public.organization_members
 for update using (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 ) with check (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy organization_members_delete on public.organization_members
 for delete using (
-  organization_id = public.current_access_org()
-  and public.current_access_role() = 'OWNER'
+  organization_id = private.current_access_org()
+  and private.current_access_role() = 'OWNER'
 );
 
 drop policy if exists access_policies_select on public.access_policies;
@@ -162,27 +170,27 @@ drop policy if exists access_policies_update on public.access_policies;
 drop policy if exists access_policies_delete on public.access_policies;
 
 create policy access_policies_select on public.access_policies
-for select using (organization_id = public.current_access_org());
+for select using (organization_id = private.current_access_org());
 
 create policy access_policies_insert on public.access_policies
 for insert with check (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy access_policies_update on public.access_policies
 for update using (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 ) with check (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy access_policies_delete on public.access_policies
 for delete using (
-  organization_id = public.current_access_org()
-  and public.current_access_role() = 'OWNER'
+  organization_id = private.current_access_org()
+  and private.current_access_role() = 'OWNER'
 );
 
 drop policy if exists access_invitations_select on public.access_invitations;
@@ -190,38 +198,36 @@ drop policy if exists access_invitations_insert on public.access_invitations;
 drop policy if exists access_invitations_update on public.access_invitations;
 
 create policy access_invitations_select on public.access_invitations
-for select using (organization_id = public.current_access_org());
+for select using (organization_id = private.current_access_org());
 
 create policy access_invitations_insert on public.access_invitations
 for insert with check (
-  organization_id = public.current_access_org()
+  organization_id = private.current_access_org()
   and invited_by = auth.uid()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy access_invitations_update on public.access_invitations
 for update using (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 ) with check (
-  organization_id = public.current_access_org()
-  and public.current_access_role() in ('OWNER','ADMIN')
+  organization_id = private.current_access_org()
+  and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 drop policy if exists access_events_select on public.access_events;
 drop policy if exists access_events_insert on public.access_events;
 
 create policy access_events_select on public.access_events
-for select using (organization_id = public.current_access_org());
+for select using (organization_id = private.current_access_org());
 
 create policy access_events_insert on public.access_events
 for insert with check (
-  organization_id = public.current_access_org()
+  organization_id = private.current_access_org()
   and actor_id = auth.uid()
 );
 
 -- Prevent clients from changing the organization context of a member or policy row.
-revoke all on public.current_access_org() from public;
-revoke all on public.current_access_role() from public;
-grant execute on function public.current_access_org() to authenticated;
-grant execute on function public.current_access_role() to authenticated;
+grant execute on function private.current_access_org() to authenticated;
+grant execute on function private.current_access_role() to authenticated;
