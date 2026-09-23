@@ -17,6 +17,17 @@ create table if not exists public.organization_members (
   constraint organization_members_status_chk check (status in ('ACTIVE','INACTIVE','SUSPENDED'))
 );
 
+alter table public.organization_members add column if not exists last_seen_at timestamptz;
+
+update public.organization_members set role = case when lower(role) in ('owner','admin','operator','compliance','analyst') then upper(role) else 'INVESTOR' end;
+update public.organization_members set status = case when lower(status) = 'active' then 'ACTIVE' when lower(status) = 'suspended' then 'SUSPENDED' else 'INACTIVE' end;
+alter table public.organization_members alter column role set default 'INVESTOR';
+alter table public.organization_members alter column status set default 'ACTIVE';
+alter table public.organization_members drop constraint if exists organization_members_role_chk;
+alter table public.organization_members add constraint organization_members_role_chk check (role in ('OWNER','ADMIN','OPERATOR','COMPLIANCE','ANALYST','INVESTOR'));
+alter table public.organization_members drop constraint if exists organization_members_status_chk;
+alter table public.organization_members add constraint organization_members_status_chk check (status in ('ACTIVE','INACTIVE','SUSPENDED'));
+
 create index if not exists organization_members_org_idx
   on public.organization_members(organization_id, status, created_at desc);
 
@@ -278,7 +289,7 @@ begin
   values (org_id,auth.uid(),''OWNER'',''ACTIVE'')
   returning * into result_member;
 
-  insert into public.access_events (organization_id,actor_id,event_type,resource,action,outcome,metadata)
+  insert into public.access_events (organization_id,user_id,event_type,resource,action,outcome,metadata)
   values (org_id,auth.uid(),''MEMBERSHIP_BOOTSTRAPPED'',''organization_members'',''CREATE'',''ALLOWED'',''{"source":"phase12-bootstrap"}''::jsonb);
 
   return result_member;
