@@ -89,7 +89,7 @@ language sql
 stable
 security definer
 set search_path = public
-as $$
+as $func$
   select organization_id from public.profiles where id = auth.uid()
 $func$;
 
@@ -99,7 +99,7 @@ language sql
 stable
 security definer
 set search_path = public
-as $$
+as $func$
   select role
   from public.organization_members
   where auth.uid() is not null
