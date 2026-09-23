@@ -141,19 +141,19 @@ drop policy if exists organization_members_update on public.organization_members
 drop policy if exists organization_members_delete on public.organization_members;
 
 create policy organization_members_select on public.organization_members
-to authenticated
-for select using (organization_id = private.current_access_org());
+for select
+to authenticated using (organization_id = private.current_access_org());
 
 create policy organization_members_insert on public.organization_members
-to authenticated
-for insert with check (
+for insert
+to authenticated with check (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy organization_members_update on public.organization_members
-to authenticated
-for update using (
+for update
+to authenticated using (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 ) with check (
@@ -162,8 +162,8 @@ for update using (
 );
 
 create policy organization_members_delete on public.organization_members
-to authenticated
-for delete using (
+for delete
+to authenticated using (
   organization_id = private.current_access_org()
   and private.current_access_role() = 'OWNER'
 );
@@ -174,19 +174,19 @@ drop policy if exists access_policies_update on public.access_policies;
 drop policy if exists access_policies_delete on public.access_policies;
 
 create policy access_policies_select on public.access_policies
-to authenticated
-for select using (organization_id = private.current_access_org());
+for select
+to authenticated using (organization_id = private.current_access_org());
 
 create policy access_policies_insert on public.access_policies
-to authenticated
-for insert with check (
+for insert
+to authenticated with check (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy access_policies_update on public.access_policies
-to authenticated
-for update using (
+for update
+to authenticated using (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 ) with check (
@@ -195,8 +195,8 @@ for update using (
 );
 
 create policy access_policies_delete on public.access_policies
-to authenticated
-for delete using (
+for delete
+to authenticated using (
   organization_id = private.current_access_org()
   and private.current_access_role() = 'OWNER'
 );
@@ -206,20 +206,20 @@ drop policy if exists access_invitations_insert on public.access_invitations;
 drop policy if exists access_invitations_update on public.access_invitations;
 
 create policy access_invitations_select on public.access_invitations
-to authenticated
-for select using (organization_id = private.current_access_org());
+for select
+to authenticated using (organization_id = private.current_access_org());
 
 create policy access_invitations_insert on public.access_invitations
-to authenticated
-for insert with check (
+for insert
+to authenticated with check (
   organization_id = private.current_access_org()
   and invited_by = auth.uid()
   and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy access_invitations_update on public.access_invitations
-to authenticated
-for update using (
+for update
+to authenticated using (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 ) with check (
@@ -231,12 +231,12 @@ drop policy if exists access_events_select on public.access_events;
 drop policy if exists access_events_insert on public.access_events;
 
 create policy access_events_select on public.access_events
-to authenticated
-for select using (organization_id = private.current_access_org());
+for select
+to authenticated using (organization_id = private.current_access_org());
 
 create policy access_events_insert on public.access_events
-to authenticated
-for insert with check (
+for insert
+to authenticated with check (
   organization_id = private.current_access_org()
   and actor_id = auth.uid()
 );
