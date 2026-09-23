@@ -57,7 +57,7 @@ export function Phase12AccessWorkspace() {
   if(!org)return;
   const {data:{user}}=await supabase.auth.getUser();
   if(!user)return;
-  await supabase.from('access_events').insert({organization_id:org,actor_id:user.id,event_type:eventType,resource,action,outcome,metadata:{source:'phase12-ui'}});
+  await supabase.from('access_events').insert({organization_id:org,user_id:user.id,event_type:eventType,resource,action,outcome,metadata:{source:'phase12-ui'}});
  }
 
  async function updateMember(member:Member, patch:Partial<Pick<Member,'role'|'status'>>){
