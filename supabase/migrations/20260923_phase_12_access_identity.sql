@@ -91,7 +91,7 @@ security definer
 set search_path = public
 as $$
   select organization_id from public.profiles where id = auth.uid()
-$$;
+$func$;
 
 create or replace function private.current_access_role()
 returns text
@@ -107,18 +107,18 @@ as $$
     and user_id = auth.uid()
     and status = 'ACTIVE'
   limit 1
-$$;
+$func$;
 
 create or replace function public.touch_access_member()
 returns trigger
 language plpgsql
 set search_path = public
-as $
+as $func$
 begin
   new.updated_at = now();
   return new;
 end;
-$$;
+$func$;
 
 drop trigger if exists organization_members_updated_at on public.organization_members;
 create trigger organization_members_updated_at
@@ -247,7 +247,7 @@ returns public.organization_members
 language plpgsql
 security definer
 set search_path = public
-as $
+as $func$
 declare
   org_id uuid;
   result_member public.organization_members;
