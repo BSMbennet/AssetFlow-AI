@@ -249,7 +249,7 @@ create policy access_events_insert on public.access_events
 for insert
 to authenticated with check (
   organization_id = private.current_access_org()
-  and actor_id = auth.uid()
+  and user_id = auth.uid()
 );
 
 
