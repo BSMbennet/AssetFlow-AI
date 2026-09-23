@@ -111,9 +111,8 @@ $$;
 create or replace function public.touch_access_member()
 returns trigger
 language plpgsql
-security definer
 set search_path = public
-as $$
+as $
 begin
   new.updated_at = now();
   return new;
@@ -141,15 +140,18 @@ drop policy if exists organization_members_update on public.organization_members
 drop policy if exists organization_members_delete on public.organization_members;
 
 create policy organization_members_select on public.organization_members
+to authenticated
 for select using (organization_id = private.current_access_org());
 
 create policy organization_members_insert on public.organization_members
+to authenticated
 for insert with check (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy organization_members_update on public.organization_members
+to authenticated
 for update using (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
@@ -159,6 +161,7 @@ for update using (
 );
 
 create policy organization_members_delete on public.organization_members
+to authenticated
 for delete using (
   organization_id = private.current_access_org()
   and private.current_access_role() = 'OWNER'
@@ -170,15 +173,18 @@ drop policy if exists access_policies_update on public.access_policies;
 drop policy if exists access_policies_delete on public.access_policies;
 
 create policy access_policies_select on public.access_policies
+to authenticated
 for select using (organization_id = private.current_access_org());
 
 create policy access_policies_insert on public.access_policies
+to authenticated
 for insert with check (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
 );
 
 create policy access_policies_update on public.access_policies
+to authenticated
 for update using (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
@@ -188,6 +194,7 @@ for update using (
 );
 
 create policy access_policies_delete on public.access_policies
+to authenticated
 for delete using (
   organization_id = private.current_access_org()
   and private.current_access_role() = 'OWNER'
@@ -198,9 +205,11 @@ drop policy if exists access_invitations_insert on public.access_invitations;
 drop policy if exists access_invitations_update on public.access_invitations;
 
 create policy access_invitations_select on public.access_invitations
+to authenticated
 for select using (organization_id = private.current_access_org());
 
 create policy access_invitations_insert on public.access_invitations
+to authenticated
 for insert with check (
   organization_id = private.current_access_org()
   and invited_by = auth.uid()
@@ -208,6 +217,7 @@ for insert with check (
 );
 
 create policy access_invitations_update on public.access_invitations
+to authenticated
 for update using (
   organization_id = private.current_access_org()
   and private.current_access_role() in ('OWNER','ADMIN')
@@ -220,9 +230,11 @@ drop policy if exists access_events_select on public.access_events;
 drop policy if exists access_events_insert on public.access_events;
 
 create policy access_events_select on public.access_events
+to authenticated
 for select using (organization_id = private.current_access_org());
 
 create policy access_events_insert on public.access_events
+to authenticated
 for insert with check (
   organization_id = private.current_access_org()
   and actor_id = auth.uid()
@@ -231,3 +243,4 @@ for insert with check (
 -- Prevent clients from changing the organization context of a member or policy row.
 grant execute on function private.current_access_org() to authenticated;
 grant execute on function private.current_access_role() to authenticated;
+grant select, insert, update, delete on public.organization_members, public.access_policies, public.access_invitations, public.access_events to authenticated;
