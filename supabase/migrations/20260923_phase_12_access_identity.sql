@@ -247,13 +247,12 @@ returns public.organization_members
 language plpgsql
 security definer
 set search_path = public
-as $func$
-declare
+as 'declare
   org_id uuid;
   result_member public.organization_members;
 begin
   if auth.uid() is null then
-    raise exception 'Authentication required';
+    raise exception ''Authentication required'';
   end if;
 
   select organization_id into org_id
@@ -261,7 +260,7 @@ begin
   where id = auth.uid();
 
   if org_id is null then
-    raise exception 'No organization is assigned to the authenticated user';
+    raise exception ''No organization is assigned to the authenticated user'';
   end if;
 
   if exists (select 1 from public.organization_members where organization_id = org_id) then
@@ -270,21 +269,20 @@ begin
     where organization_id = org_id and user_id = auth.uid()
     limit 1;
     if result_member.id is null then
-      raise exception 'Organization already has an access owner';
+      raise exception ''Organization already has an access owner'';
     end if;
     return result_member;
   end if;
 
   insert into public.organization_members (organization_id,user_id,role,status)
-  values (org_id,auth.uid(),'OWNER','ACTIVE')
+  values (org_id,auth.uid(),''OWNER'',''ACTIVE'')
   returning * into result_member;
 
   insert into public.access_events (organization_id,actor_id,event_type,resource,action,outcome,metadata)
-  values (org_id,auth.uid(),'MEMBERSHIP_BOOTSTRAPPED','organization_members','CREATE','ALLOWED','{"source":"phase12-bootstrap"}'::jsonb);
+  values (org_id,auth.uid(),''MEMBERSHIP_BOOTSTRAPPED'',''organization_members'',''CREATE'',''ALLOWED'',''{"source":"phase12-bootstrap"}''::jsonb);
 
   return result_member;
-end;
-$;
+end;';
 
 grant execute on function private.bootstrap_access_member() to authenticated;
 
