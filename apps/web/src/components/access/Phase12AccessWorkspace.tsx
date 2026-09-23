@@ -33,6 +33,7 @@ export function Phase12AccessWorkspace() {
   const {data:profile,error:profileError}=await supabase.from('profiles').select('organization_id').eq('id',user.id).maybeSingle();
   if(profileError||!profile?.organization_id){setError(profileError?.message||'No organization is assigned to this account');setLoading(false);return;}
   setOrg(profile.organization_id);
+  await supabase.rpc('bootstrap_access_member');
   const {data:me}=await supabase.from('organization_members').select('role,status').eq('organization_id',profile.organization_id).eq('user_id',user.id).maybeSingle();
   setMyRole(me?.status==='ACTIVE'?me.role:null);
   const [m,p,e,i]=await Promise.all([
