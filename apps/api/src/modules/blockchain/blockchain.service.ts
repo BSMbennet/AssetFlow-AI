@@ -38,7 +38,9 @@ export class BlockchainService {
 
   private validate(input: { recipient: string; amount: string }) {
     if (!ethers.isAddress(input.recipient)) throw new BadRequestException('recipient must be a valid EVM address');
-    if (!/^\d+$/.test(input.amount) || input.amount === '0') throw new BadRequestException('amount must be a positive integer in token base units');
+    if (!/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(input.amount) || Number(input.amount) <= 0) {
+      throw new BadRequestException('amount must be a positive token amount');
+    }
   }
 
   private requestHash(requestId: string) {
@@ -65,17 +67,18 @@ export class BlockchainService {
     const provider = this.provider();
     const contract = this.contract(provider);
     const [decimals, symbol, remainingSupply] = await Promise.all([contract.decimals(), contract.symbol(), contract.remainingSupply()]);
+    const amountBaseUnits = ethers.parseUnits(input.amount, Number(decimals));
     const requestHash = this.requestHash(input.requestId);
     const iface = new ethers.Interface(RWA_ABI);
-    const data = iface.encodeFunctionData('issue', [input.recipient, input.amount, requestHash]);
-    if (BigInt(input.amount) > BigInt(remainingSupply)) throw new BadRequestException('Requested amount exceeds contract remaining supply');
+    const data = iface.encodeFunctionData('issue', [input.recipient, amountBaseUnits, requestHash]);
+    if (amountBaseUnits > BigInt(remainingSupply)) throw new BadRequestException('Requested amount exceeds contract remaining supply');
     return {
       requestId: input.requestId,
       network: Number((await provider.getNetwork()).chainId),
       contract: this.tokenContractAddress,
       recipient: input.recipient,
-      amountBaseUnits: input.amount,
-      displayAmount: ethers.formatUnits(input.amount, Number(decimals)),
+      amountBaseUnits: amountBaseUnits.toString(),
+      displayAmount: ethers.formatUnits(amountBaseUnits, Number(decimals)),
       symbol,
       issuanceRequestHash: requestHash,
       data,
@@ -89,7 +92,7 @@ export class BlockchainService {
     const provider = this.provider();
     const wallet = new ethers.Wallet(this.privateKey, provider);
     const contract = this.contract(wallet);
-    const tx = await contract.issue(input.recipient, input.amount, prepared.issuanceRequestHash);
+    const tx = await contract.issue(input.recipient, prepared.amountBaseUnits, prepared.issuanceRequestHash);
     const receipt = await tx.wait();
     return { ...prepared, signer: wallet.address, transactionHash: receipt.hash, blockNumber: receipt.blockNumber, status: receipt.status === 1 ? 'confirmed' : 'failed' };
   }
