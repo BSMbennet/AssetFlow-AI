@@ -1,6 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, Param, Post, Req, UseGuards, BadRequestException } from '@nestjs/common';
 import { IsNotEmpty, IsString, Matches } from 'class-validator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SupabaseOrJwtGuard } from './supabase-or-jwt.guard';
 import { BlockchainService } from './blockchain.service';
 
 class MintDto {
@@ -21,7 +21,7 @@ export class BlockchainController {
   @Get('status')
   status() { return this.blockchain.status(); }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseOrJwtGuard)
   @Post('issuance/:requestId/prepare')
   prepare(@Req() req: any, @Param('requestId') requestId: string, @Body() body: MintDto) {
     this.assertIssuer(req.user);
@@ -29,7 +29,7 @@ export class BlockchainController {
     return this.blockchain.prepareMint({ requestId, recipient: body.recipient, amount: body.amount });
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseOrJwtGuard)
   @Post('issuance/:requestId/execute')
   execute(@Req() req: any, @Param('requestId') requestId: string, @Body() body: MintDto) {
     this.assertIssuer(req.user);
@@ -38,7 +38,9 @@ export class BlockchainController {
   }
 
   private assertIssuer(user: any) {
-    if (!['ADMIN', 'SUPER_ADMIN'].includes(user?.role)) throw new ForbiddenException('Blockchain issuance requires administrator privileges');
+    if (!['ADMIN', 'SUPER_ADMIN', 'PLATFORM_ADMIN', 'ORG_ADMIN', 'ASSET_MANAGER', 'SUPABASE_AUTHENTICATED'].includes(user?.role)) {
+      throw new ForbiddenException('Blockchain issuance requires an authorized issuer role');
+    }
   }
 
   private assertRequestId(requestId: string) {
