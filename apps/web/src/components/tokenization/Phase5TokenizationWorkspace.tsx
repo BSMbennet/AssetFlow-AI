@@ -99,7 +99,7 @@ export function Phase5TokenizationWorkspace() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Your web session could not be authenticated for blockchain issuance');
       const api = process.env.NEXT_PUBLIC_ASSETFLOW_API_URL || 'https://assetflow-api-ze0x.onrender.com';
-      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` };
+      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, 'x-supabase-url': process.env.NEXT_PUBLIC_SUPABASE_URL || '', 'x-supabase-anon-key': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' };
       const response = await fetch(`${api}/api/v1/blockchain/issuance/${request.id}/prepare`, { method: 'POST', headers, body: JSON.stringify({ recipient: recipient.trim(), amount: String(request.total_supply) }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Blockchain adapter rejected the request');
